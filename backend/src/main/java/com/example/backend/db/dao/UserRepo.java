@@ -13,7 +13,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import com.example.backend.db.DB;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Reservation;
 import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
@@ -342,61 +341,6 @@ public class UserRepo implements UserRepoInterface {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public List<Reservation> getReservations(int athleteId){        
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement(
-                "SELECT r.id, f.name AS facility_name, f.city, c.name AS court_name, " +
-                "s.name AS sport, r.time_from, r.time_to, r.status " +
-                "FROM reservation r " +
-                "JOIN court c ON r.court_id = c.id " +
-                "JOIN facility f ON c.facility_id = f.id " +
-                "JOIN sport s ON r.sport_id = s.id " +
-                "WHERE r.athlete_id = ? " +
-                "ORDER BY r.time_from DESC"
-            );) 
-            {
-                List<Reservation> reservations = new ArrayList<>();
-
-                stm.setInt(1, athleteId);
-                ResultSet rs = stm.executeQuery();
-
-                while (rs.next()) {
-                    Reservation res = new Reservation(
-                        rs.getInt("id"),
-                        rs.getString("facility_name"),
-                        rs.getString("city"),
-                        rs.getString("court_name"),
-                        rs.getString("sport"),
-                        rs.getTimestamp("time_from").toLocalDateTime(),
-                        rs.getTimestamp("time_to").toLocalDateTime(),
-                        rs.getString("status")
-                    );
-                    reservations.add(res);
-                }
-                return reservations;
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    
-        return null;
-    }
-
-    public Message cancelReservation(int resId){
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("DELETE FROM reservation WHERE id=?")) 
-            {
-                stm.setInt(1,resId);
-                
-                int rows = stm.executeUpdate();
-                return rows > 0 ? new Message("Reservation successfully deleted!") : new Message("Error deleting reservation");
-                
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @Override

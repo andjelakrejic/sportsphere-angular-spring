@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Reservation;
 import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
@@ -24,9 +23,6 @@ public interface UserRepoInterface {
     public Message updateAthlete(Athlete a);
     public Message updateFavoriteSports(FavoriteSportsObject obj);
     public Message changePassword(ChangePasswordObject obj);
-
-    public List<Reservation> getReservations(int athleteId);
-    public Message cancelReservation(int resId);
 
     public List<Sport> getAllSports();
 

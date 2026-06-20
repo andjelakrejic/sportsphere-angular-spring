@@ -55,6 +55,16 @@ public class FacilityController {
         return new FacilityRepo().searchFacilities(name, city, sport, type);
     }
 
+    @GetMapping("/searchFreeTodayFacility")
+    public List<Facility> searchFreeTodayFacilities(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) String sport,
+        @RequestParam(required = false) String type
+    ) {
+        return new FacilityRepo().searchFreeTodayFacilities(name, city, sport, type);
+    }
+
     @GetMapping("/getFacility/{facilityId}")
     public Facility getFacility(@PathVariable int facilityId) {
         return new FacilityRepo().getFacility(facilityId);

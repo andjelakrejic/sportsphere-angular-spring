@@ -12,6 +12,8 @@ public interface FacilityRepoInterface {
     public List<String> getAllSports();
     public List<String> getActiveCities();
     public List<Facility> searchFacilities(String name, String city, String sport, String type);
+    public List<Facility> searchFreeTodayFacilities(String name, String city, String sport, String type);
+
     public Facility getFacility(int id);
     public List<String> getFacilityImages(int id);
     public List<CourtInfo> getAvailableCourts(int id);

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.db.dao.UserRepo;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Reservation;
 import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
@@ -73,16 +72,6 @@ public class UserController {
     @PostMapping("/changePassword")
     public Message changePassword(@RequestBody ChangePasswordObject obj) {
         return new UserRepo().changePassword(obj);
-    }
-    
-    @GetMapping("/getReservations/{athleteId}")
-    public List<Reservation> getReservations(@PathVariable int athleteId) {
-        return new UserRepo().getReservations(athleteId);
-    }
-
-    @PostMapping("/cancelReservation")
-    public Message cancelReservation(@RequestBody int id) {
-        return new UserRepo().cancelReservation(id);
     }
 
     @GetMapping("/getAllSports")

@@ -274,4 +274,69 @@ public class FacilityRepo implements FacilityRepoInterface {
         return null;
     }
 
+    @Override
+public List<Facility> searchFreeTodayFacilities(String name, String city, String sport, String type) {
+    try (Connection conn = DB.source().getConnection()) {
+
+        StringBuilder query = new StringBuilder(
+            "SELECT DISTINCT f.* FROM facility f " +
+            "LEFT JOIN facility_sport fs ON f.id = fs.facility_id " +
+            "LEFT JOIN sport s ON fs.sport_id = s.id " +
+            "LEFT JOIN court c ON f.id = c.facility_id " +
+            "WHERE f.status = 'ACTIVE' " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM court c2 WHERE c2.facility_id = f.id " +
+            "  AND NOT EXISTS (" +
+            "    SELECT 1 FROM reservation r WHERE r.court_id = c2.id " +
+            "    AND r.date = CURDATE() AND r.status != 'CANCELLED'" +
+            "  )" +
+            ")"
+        );
+
+        if (name != null && !name.isEmpty())
+            query.append(" AND f.name LIKE ?");
+        if (city != null && !city.isEmpty())
+            query.append(" AND f.city = ?");
+        if (sport != null && !sport.isEmpty())
+            query.append(" AND s.name = ?");
+        if (type != null && !type.isEmpty())
+            query.append(" AND c.type = ?");
+
+        PreparedStatement stm = conn.prepareStatement(query.toString());
+
+        List<Facility> facilities = new ArrayList<>();
+
+        int index = 1;
+        if (name != null && !name.isEmpty())
+            stm.setString(index++, "%" + name + "%");
+        if (city != null && !city.isEmpty())
+            stm.setString(index++, city);
+        if (sport != null && !sport.isEmpty())
+            stm.setString(index++, sport);
+        if (type != null && !type.isEmpty())
+            stm.setString(index++, type);
+
+        ResultSet rs = stm.executeQuery();
+        while (rs.next()) {
+            Facility f = new Facility(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("city"),
+                rs.getString("address"),
+                rs.getString("description"),
+                rs.getString("working_hours_from"),
+                rs.getString("working_hours_to"),
+                rs.getDouble("price_per_hour"),
+                rs.getString("status")
+            );
+            facilities.add(f);
+        }
+        return facilities;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
 }
