@@ -11,9 +11,10 @@ public class Facility { // ima mnogo vise polja u bazi
     private double pricePerHour;
     private String status;
     private int numOfLikes;
+    private String sports;
+    private String type;
     
-    
-    
+
     public Facility(int id, String name, String city, String address, String description, String workingHoursFrom,
             String workingHoursTo, double pricePerHour, String status, int numOfLikes) {
         this.id = id;
@@ -26,6 +27,7 @@ public class Facility { // ima mnogo vise polja u bazi
         this.pricePerHour = pricePerHour;
         this.status = status;
         this.numOfLikes = numOfLikes;
+        this.sports = "";
     }
 
     // konstruktor bez numOfLikes - za getActiveFacilities
@@ -99,17 +101,27 @@ public class Facility { // ima mnogo vise polja u bazi
         this.status = status;
     }
 
-
-
     public int getNumOfLikes() {
         return numOfLikes;
     }
-
-
-
     public void setNumOfLikes(int numOfLikes) {
         this.numOfLikes = numOfLikes;
     }  
     
+    public String getSports() {
+        return sports;
+    }
+
+    public void setSports(String sports) {
+        this.sports = sports;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
     
 }

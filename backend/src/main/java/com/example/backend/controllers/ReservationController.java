@@ -14,6 +14,7 @@ import com.example.backend.db.dao.ReservationRepo;
 import com.example.backend.models.Message;
 import com.example.backend.models.Reservation;
 import com.example.backend.models.helpers.CreateReservationObject;
+import com.example.backend.models.helpers.GetReservationObject;
 
 
 @RestController
@@ -35,4 +36,10 @@ public class ReservationController {
     public Message cancelReservation(@RequestBody int id) {
         return new ReservationRepo().cancelReservation(id);
     }
+
+    @PostMapping("/getReservationsForCourt")
+    public List<Reservation> getReservationsForCourt(@RequestBody GetReservationObject obj) {
+        return new ReservationRepo().getReservationsForCourt(obj);
+    }
+    
 }

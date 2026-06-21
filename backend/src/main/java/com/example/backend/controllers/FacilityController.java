@@ -3,7 +3,6 @@ package com.example.backend.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.db.dao.FacilityRepo;
-import com.example.backend.models.CourtInfo;
 import com.example.backend.models.Facility;
 
 import java.util.List;
@@ -74,12 +73,6 @@ public class FacilityController {
     public List<String> getFacilityImages(@PathVariable int facilityId) {
         return new FacilityRepo().getFacilityImages(facilityId);
     }
-
-    @GetMapping("/getAvailableCourts/{facilityId}")
-    public List<CourtInfo> getAvailableCourts(@PathVariable int facilityId) {
-        return new FacilityRepo().getAvailableCourts(facilityId);
-    }
-    
     
     
 }

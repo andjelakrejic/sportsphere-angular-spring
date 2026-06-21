@@ -14,6 +14,7 @@ import com.example.backend.db.DB;
 import com.example.backend.models.Message;
 import com.example.backend.models.Reservation;
 import com.example.backend.models.helpers.CreateReservationObject;
+import com.example.backend.models.helpers.GetReservationObject;
 
 public class ReservationRepo implements ReservationRepoInterface{
 
@@ -101,6 +102,39 @@ public class ReservationRepo implements ReservationRepoInterface{
             e.printStackTrace();
         }
         return new Message("Error deleting reservation");
+    }
+
+    @Override
+    public List<Reservation> getReservationsForCourt(GetReservationObject obj) {
+        List<Reservation> reservations = new ArrayList<>();
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT * FROM reservation WHERE court_id = ? AND date BETWEEN ? AND ? " +
+                "AND status != 'CANCELLED'"
+            );
+        ) {
+            stm.setInt(1, obj.getCourtId());
+            stm.setDate(2, java.sql.Date.valueOf(obj.getWeekStart()));
+            stm.setDate(3, java.sql.Date.valueOf(obj.getWeekEnd()));
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                LocalDate date = rs.getDate("date").toLocalDate();
+                LocalTime timeFrom = rs.getTime("time_from").toLocalTime();
+                LocalTime timeTo = rs.getTime("time_to").toLocalTime();
+
+                reservations.add(new Reservation(
+                    rs.getInt("id"),
+                    null, null, null, null, // ne trebaju nam za kalendar
+                    LocalDateTime.of(date, timeFrom),
+                    LocalDateTime.of(date, timeTo),
+                    rs.getString("status")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reservations;
     }
     
 }
