@@ -8,8 +8,10 @@ public interface FacilityRepoInterface {
     public List<Facility> getActiveFacilities();
     public List<Facility> getTop3Facilities();
     // public int getNumOfLikes(int id);
+
     public List<String> getAllSports();
     public List<String> getActiveCities();
+    
     public List<Facility> searchFacilities(String name, String city, String sport, String type);
     public List<Facility> searchFreeTodayFacilities(String name, String city, String sport, String type);
 

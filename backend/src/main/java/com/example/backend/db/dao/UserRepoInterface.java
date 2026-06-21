@@ -13,9 +13,11 @@ public interface UserRepoInterface {
 
     public Athlete loginAthlete(Athlete a);
     public Worker loginWorker(Worker a);
+    
     public int registerAthlete(Athlete a);
     public int registerWorker(Worker w);
-
+    // public int registerAthleteWithImage(Athlete a);
+    // public int registerWorkerWithImage(Worker w);
 
     public Worker getWorker(String username);
     public Athlete getAthlete(String username);

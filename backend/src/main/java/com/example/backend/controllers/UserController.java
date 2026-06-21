@@ -3,6 +3,8 @@ package com.example.backend.controllers;
 import java.util.List;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,14 +26,33 @@ import com.example.backend.models.helpers.FavoriteSportsObject;
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
+    // @PostMapping("/loginAthlete")
+    // public Athlete loginAthlete(@RequestBody Athlete a) {
+    //     return new UserRepo().loginAthlete(a);
+    // }
+
+    // @PostMapping("/loginWorker")
+    // public Worker loginWorker(@RequestBody Worker w) {
+    //     return new UserRepo().loginWorker(w);
+    // }
+
+    // ovo gore ne radi zbog hesiranja lozinke..
     @PostMapping("/loginAthlete")
-    public Athlete loginAthlete(@RequestBody Athlete a) {
-        return new UserRepo().loginAthlete(a);
+    public ResponseEntity<Athlete> loginAthlete(@RequestBody Athlete a) {
+        Athlete result = new UserRepo().loginAthlete(a);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/loginWorker")
-    public Worker loginWorker(@RequestBody Worker w) {
-        return new UserRepo().loginWorker(w);
+    public ResponseEntity<Worker> loginWorker(@RequestBody Worker w) {
+        Worker result = new UserRepo().loginWorker(w);
+        if (result == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/registerAthlete")

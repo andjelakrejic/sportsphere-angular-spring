@@ -72,7 +72,7 @@ public class UserRepo implements UserRepoInterface {
                 String hashInDb = rs.getString("password");
                 boolean match = BCrypt.checkpw(w.getPassword(), hashInDb);
                 if (!match) return null;
-
+                
                 return new Worker(
                     rs.getInt("id"),
                     rs.getString("username"),
