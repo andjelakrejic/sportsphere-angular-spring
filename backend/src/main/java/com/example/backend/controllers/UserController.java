@@ -2,7 +2,7 @@ package com.example.backend.controllers;
 
 import java.util.List;
 
-import org.mindrot.jbcrypt.BCrypt;
+// import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -65,14 +65,19 @@ public class UserController {
         return new UserRepo().registerWorker(w);
     }
 
-    @GetMapping("/hashTest")
-    public String hashTest() {
-        return BCrypt.hashpw("Test1234!", BCrypt.gensalt());
-    }
+    // @GetMapping("/hashTest")
+    // public String hashTest() {
+    //     return BCrypt.hashpw("Test1234!", BCrypt.gensalt());
+    // }
 
     @GetMapping("/getAthlete/{username}")
     public Athlete getAthlete(@PathVariable String username) {
         return new UserRepo().getAthlete(username);
+    }
+
+    @GetMapping("/getAthleteById/{id}")
+    public Athlete getAthleteById(@PathVariable int id) {
+        return new UserRepo().getAthleteById(id);
     }
 
     @GetMapping("/getWorker/{username}")

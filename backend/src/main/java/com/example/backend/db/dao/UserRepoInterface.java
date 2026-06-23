@@ -21,6 +21,7 @@ public interface UserRepoInterface {
 
     public Worker getWorker(String username);
     public Athlete getAthlete(String username);
+    public Athlete getAthleteById(int id);
 
     public Message updateAthlete(Athlete a);
     public Message updateFavoriteSports(FavoriteSportsObject obj);

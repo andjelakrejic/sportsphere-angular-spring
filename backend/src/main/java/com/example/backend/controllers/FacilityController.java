@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.db.dao.FacilityRepo;
 import com.example.backend.models.Facility;
+import com.example.backend.models.Sport;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,6 +43,11 @@ public class FacilityController {
     @GetMapping("/getAllSports")
     public List<String> getAllSports() {
        return new FacilityRepo().getAllSports();
+    }
+
+    @GetMapping("/getAllSportsObject")
+    public List<Sport> getAllSportsObject() {
+       return new FacilityRepo().getAllSportsObject();
     }
 
     @GetMapping("/searchFacility")

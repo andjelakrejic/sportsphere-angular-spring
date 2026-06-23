@@ -3,6 +3,7 @@ package com.example.backend.db.dao;
 import java.util.List;
 
 import com.example.backend.models.Facility;
+import com.example.backend.models.Sport;
 
 public interface FacilityRepoInterface {
     public List<Facility> getActiveFacilities();
@@ -10,6 +11,7 @@ public interface FacilityRepoInterface {
     // public int getNumOfLikes(int id);
 
     public List<String> getAllSports();
+    public List<Sport> getAllSportsObject();
     public List<String> getActiveCities();
     
     public List<Facility> searchFacilities(String name, String city, String sport, String type);

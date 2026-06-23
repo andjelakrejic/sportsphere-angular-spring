@@ -263,6 +263,32 @@ public class UserRepo implements UserRepoInterface {
         return null;
     }
 
+    @Override
+    public Athlete getAthleteById(int id) { // ne dohvata favoritesports iz tabele athlete_sport to dodaj jer ne radi athlete_profile u frontu
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement("select name from user where id=?");
+        ) {
+            stm.setInt(1, id);
+
+            ResultSet rs = stm.executeQuery();
+            if(rs.next()){
+                return new Athlete(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("firstname"),
+                    rs.getString("lastname"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("image")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     // 1. Update osnovnih podataka (bez username-a)
     public Message updateAthlete(Athlete a) {

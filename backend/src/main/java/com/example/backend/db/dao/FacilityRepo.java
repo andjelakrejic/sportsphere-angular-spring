@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.example.backend.db.DB;
 import com.example.backend.models.Facility;
+import com.example.backend.models.Sport;
 
 public class FacilityRepo implements FacilityRepoInterface {
 
@@ -132,6 +133,30 @@ public class FacilityRepo implements FacilityRepoInterface {
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 sports.add(rs.getString("name"));
+            }
+            return sports;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+     @Override
+    public List<Sport> getAllSportsObject() {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT * FROM sport"
+            );
+        ) {
+            List<Sport> sports = new ArrayList<>();
+            
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Sport s = new Sport(
+                    rs.getInt("id"),
+                    rs.getString("name")
+                );
+                sports.add(s);
             }
             return sports;
         } catch (SQLException e) {
