@@ -11,15 +11,16 @@ public interface TeammateRepoInterface {
     // Ads
     public List<TeammateAd> getTeammateAds (int athleteId);
     public List<TeammateAd> getAllActiveAds();
-    Message createAd(TeammateAd obj);
-    Message closeAd(int adId);
+    public Message createAd(TeammateAd obj);
+    public Message closeAd(int adId);
 
     // Requests
     public List<TeammateRequest> getTeammateRequests(int adId);
-    TeammateRequest getTeammateRequest(int athleteId, int adId);
-    Message sendRequest(TeammateRequest t);
-    Message approveRequest(TeammateRequest t);
-    Message rejectRequest(int requestId);
+    public TeammateRequest getTeammateRequest(int athleteId, int adId);
+    public Message sendRequest(TeammateRequest t);
+    public Message approveRequest(TeammateRequest t);
+    public Message rejectRequest(int requestId);
+    public List<Integer> getMySentRequests(int athleteId);
 
 
 

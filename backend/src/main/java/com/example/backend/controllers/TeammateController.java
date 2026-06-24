@@ -49,7 +49,7 @@ public class TeammateController {
     }
 
     @PostMapping("/createAd")
-    public Message createAd(@RequestParam TeammateAd obj ) {
+    public Message createAd(@RequestBody TeammateAd obj ) {
         return new TeammateRepo().createAd(obj);
     }
 
@@ -59,7 +59,7 @@ public class TeammateController {
     }
 
     @PostMapping("/sendRequest")
-    public Message sendRequest(@RequestParam TeammateRequest t) {
+    public Message sendRequest(@RequestBody TeammateRequest t) {
         return new TeammateRepo().sendRequest(t);
     }
 
@@ -71,6 +71,11 @@ public class TeammateController {
     @PostMapping("/rejectRequest")
     public Message rejectRequest(@RequestParam int requestId) {
         return new TeammateRepo().rejectRequest(requestId);
+    }
+
+    @GetMapping("/getMySentRequests/{athleteId}")
+    public List<Integer> getMySentRequests(@PathVariable int athleteId) {
+        return new TeammateRepo().getMySentRequests(athleteId);
     }
 
 }

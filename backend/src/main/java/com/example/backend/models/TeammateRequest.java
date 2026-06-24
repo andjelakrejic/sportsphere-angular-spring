@@ -8,7 +8,8 @@ public class TeammateRequest {
     private String status;
     private String createdAt;
     
-    
+    public TeammateRequest() {}
+
     public TeammateRequest(int id, int adId, int athleteId, String status, String createdAt) {
         this.id = id;
         this.adId = adId;

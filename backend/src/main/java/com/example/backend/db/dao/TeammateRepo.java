@@ -176,22 +176,34 @@ public class TeammateRepo implements TeammateRepoInterface {
 
     @Override
     public Message sendRequest(TeammateRequest t) {
-        Message m = new Message("");
-        try (Connection conn = DB.source().getConnection();
+       Message m = new Message("");
+        try (Connection conn = DB.source().getConnection()) {
+            
+            // proveri da li vec postoji zahtev
+            PreparedStatement check = conn.prepareStatement(
+                "SELECT id FROM teammate_request WHERE ad_id = ? AND athlete_id = ?");
+            check.setInt(1, t.getAdId());
+            check.setInt(2, t.getAthleteId());
+            ResultSet rs = check.executeQuery();
+            
+            if (rs.next()) {
+                m.setMessage("ALREADY_SENT");
+                return m;
+            }
+
             PreparedStatement stm = conn.prepareStatement(
-                "INSERT INTO teammate_request (ad_id, athlete_id, status) VALUES (?, ?, 'PENDING')")
-        ) {
+                "INSERT INTO teammate_request (ad_id, athlete_id, status) VALUES (?, ?, 'PENDING')");
             stm.setInt(1, t.getAdId());
             stm.setInt(2, t.getAthleteId());
 
-            if(stm.executeUpdate() > 0) {
-                m.setMessage("Successfully sent request!");
+            if (stm.executeUpdate() > 0) {
+                m.setMessage("OK");
                 return m;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        m.setMessage("Error sending Request");
+        m.setMessage("ERROR");
         return m;
     }
 
@@ -244,6 +256,26 @@ public class TeammateRepo implements TeammateRepoInterface {
         }
         m.setMessage("Error rejecting Request");
         return m;
+    }
+
+    @Override
+    public List<Integer> getMySentRequests(int athleteId) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT ad_id FROM teammate_request WHERE athlete_id = ?")) 
+            {
+                List<Integer> ids = new ArrayList<>();
+                stm.setInt(1, athleteId);
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    ids.add(rs.getInt("ad_id"));
+                }
+                return ids;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
     }
     
 }
