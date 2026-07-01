@@ -14,7 +14,7 @@ public class CourtRepo implements CourtRepoInterface{
     @Override
     public List<Court> getAvailableCourts(int id) { // da se doda provera za sport tj join sa facility_sport??
         try (Connection conn = DB.source().getConnection();
-         PreparedStatement stm = conn.prepareStatement("SELECT name, type FROM court WHERE facility_id=?")) {
+         PreparedStatement stm = conn.prepareStatement("SELECT * FROM court WHERE facility_id=?")) {
          
             stm.setInt(1, id);
             List<Court> courts = new ArrayList<>();
