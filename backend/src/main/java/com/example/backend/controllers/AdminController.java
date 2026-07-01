@@ -1,5 +1,7 @@
 package com.example.backend.controllers;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +12,10 @@ import com.example.backend.db.dao.AdminRepo;
 import com.example.backend.models.Admin;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.User;
+
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/admin")
@@ -35,5 +41,11 @@ public class AdminController {
     public Message denyRequest(@RequestBody int userId) {        
         return new AdminRepo().denyRequest(userId);
     }
+
+    @GetMapping("/viewAllAccounts")
+    public List<User> viewAllAccounts() {
+        return new AdminRepo().viewAllAccounts();
+    }
+    
     
 }

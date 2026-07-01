@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -11,6 +13,7 @@ import com.example.backend.db.DB;
 import com.example.backend.models.Admin;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.User;
 
 public class AdminRepo implements AdminRepoInterface {
     
@@ -106,6 +109,38 @@ public class AdminRepo implements AdminRepoInterface {
             e.printStackTrace();
        }
        return m;
+    }
+
+    @Override
+    public List<User> viewAllAccounts() {
+         try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement("select * from user where role !='ADMIN'");
+        ) {
+            List<User> users = new ArrayList<>();
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()){
+                User u = new User(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("firstname"),
+                    rs.getString("lastname"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("profile_image"),
+                    rs.getString("status"),
+                     rs.getString("role")
+                );
+                users.add(u);
+            }
+            return users;
+            
+
+           } catch (SQLException e) {
+            e.printStackTrace();
+       }
+       return null;
     }
 
     @Override
