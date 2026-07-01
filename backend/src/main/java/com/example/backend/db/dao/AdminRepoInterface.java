@@ -14,11 +14,11 @@ public interface AdminRepoInterface {
 
     public Message acceptRequest(int userId); //zahtevi za registraciju se posmatraju u "posebnom pregledu"
     public Message denyRequest(int userId);
+    public List<User> viewAllAccounts();
 
     //nisi napravila na dole:
     public Message acceptFacilityRequest(); // odobrava novo unet sportski objekat od worker    
 
-    public List<User> viewAllAccounts();
     public Message changeAthleteAccount();
     public Message changeWorkerAccount();
     public Message deleteAthleteAccount();
