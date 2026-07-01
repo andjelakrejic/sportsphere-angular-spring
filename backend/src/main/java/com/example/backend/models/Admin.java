@@ -1,29 +1,10 @@
 package com.example.backend.models;
 
-public class Admin {
-    String username;
-    String password;
+public class Admin extends User{
     
-    public Admin(String username, String password) {
-        this.username = username;
-        this.password = password;
+    public Admin(int id, String username, String password, String firstname, String lastname,
+                String email, String phone, String profileImage) {
+        super(id, username, password, firstname, lastname, email, phone, profileImage, "/", "ADMIN");
     }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    
+   
 }

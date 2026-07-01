@@ -11,6 +11,8 @@ INSERT INTO equipment (name, sport_id, price, stock_quantity, image_url, descrip
 ('Dumbbell Set 10kg', 5, 4999.00, 6, 'uploads/dumbbells.jpg', 'Rubber coated dumbbell pair'),
 ('Resistance Bands', 5, 799.00, 40, 'uploads/bands.jpg', 'Set of 5 resistance bands');
 
+
+
 -- Orders za athlete_id = 1
 INSERT INTO orders (athlete_id, total_price, status, created_at) VALUES
 (1, 6398.00, 'ORDERED', '2025-06-20 10:30:00'),

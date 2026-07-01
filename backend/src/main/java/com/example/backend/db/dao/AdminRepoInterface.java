@@ -9,7 +9,10 @@ public interface AdminRepoInterface {
 
     public Message addSport(Sport s);
 
-    public Message acceptRequest(); //zahtevi za registraciju od athlete ili worker
+    public Message acceptRequest(int userId); //zahtevi za registraciju od athlete ili worker
+    public Message denyRequest(int userId);
+    
+    //nisi napravila na dole:
     public Message acceptFacilityRequest(); // odobrava novo unet sportski objekat od worker    
 
     public Message changeAthleteAccount();
