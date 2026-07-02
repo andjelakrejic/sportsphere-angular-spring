@@ -1,4 +1,4 @@
-DELETE FROM facility_reaction WHERE facility_id = 1 AND athlete_id = 3 AND type = 'LIKE';
+DELETE FROM facility_reaction WHERE facility_id = 1 AND athlete_id = 2 AND type = 'LIKE';
 -- step 1: raw data, no joins
 SELECT * FROM facility_reaction WHERE facility_id = 1 AND type = 'COMMENT';
 
