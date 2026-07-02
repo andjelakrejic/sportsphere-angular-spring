@@ -29,11 +29,6 @@ public class FacilityController {
     public List<Facility> getTop3Facilities() {
         return new FacilityRepo().getTop3Facilities();
     }
-    
-    // @GetMapping("/getNumOfLikes/{facilityId}")
-    // public int getTop3Facilities(@PathVariable int facilityId) {
-    //     return new FacilityRepo().getNumOfLikes(facilityId);
-    // }
 
     @GetMapping("/getActiveCities")
     public List<String> getActiveCities() {

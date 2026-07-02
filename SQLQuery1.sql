@@ -1,3 +1,34 @@
+DELETE FROM facility_reaction WHERE facility_id = 1 AND athlete_id = 3 AND type = 'LIKE';
+-- step 1: raw data, no joins
+SELECT * FROM facility_reaction WHERE facility_id = 1 AND type = 'COMMENT';
+
+-- step 2: with the joins the query actually uses
+SELECT fr.id, fr.athlete_id, fr.comment, a.id AS athlete_pk, a.user_id, u.id AS user_pk
+FROM facility_reaction fr
+JOIN athlete a ON fr.athlete_id = a.id
+JOIN user u ON a.user_id = u.id
+WHERE fr.facility_id = 1 AND fr.type = 'COMMENT';
+
+INSERT INTO facility_reaction (facility_id, athlete_id, type, comment, created_at) VALUES
+-- facility 1 (most comments here)
+(1, 1, 'COMMENT', 'Really well maintained courts, will book again.', '2026-06-18 09:10:00'),
+(1, 2, 'COMMENT', 'Good location, easy to find parking.', '2026-06-19 12:00:00'),
+(1, 1, 'COMMENT', 'Came back for a second session, still great.', '2026-06-20 17:45:00'),
+(1, 3, 'COMMENT', 'Staff were friendly and helpful.', '2026-06-21 08:30:00'),
+(1, 2, 'COMMENT', 'Bit crowded on weekends but worth it.', '2026-06-22 19:15:00'),
+(1, 1, 'COMMENT', 'Lighting in the evening could be improved.', '2026-06-23 20:00:00'),
+
+-- facility 2
+(2, 1, 'COMMENT', 'Nice smaller facility, less crowded.', '2026-06-19 10:00:00'),
+(2, 2, 'COMMENT', 'Equipment was a bit outdated.', '2026-06-20 11:30:00'),
+
+-- facility 3
+(3, 1, 'COMMENT', 'Best courts I have used so far.', '2026-06-21 14:00:00'),
+(3, 2, 'COMMENT', 'Clean facilities, would recommend.', '2026-06-22 16:20:00'),
+
+-- facility 5
+(5, 1, 'COMMENT', 'Solid experience overall, good value.', '2026-06-24 13:10:00');
+
 -- Equipment
 INSERT INTO equipment (name, sport_id, price, stock_quantity, image_url, description) VALUES
 ('Football Pro', 1, 2999.00, 15, 'uploads/football.jpg', 'Professional match football'),
