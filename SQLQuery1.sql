@@ -1,13 +1,63 @@
-DELETE FROM facility_reaction WHERE facility_id = 1 AND athlete_id = 2 AND type = 'LIKE';
--- step 1: raw data, no joins
-SELECT * FROM facility_reaction WHERE facility_id = 1 AND type = 'COMMENT';
+-- Trainer needs a user account first (assuming user id 50 doesn't exist yet)
+INSERT INTO user (id, username, firstname, lastname, email, password, profile_image, role)
+VALUES (50, 'marko_pet', 'Marko', 'Petrović', 'marko.trainer@test.com', '$2a$10$dummyhashforsakeoftesting', 'trainer1.jpg', 'TRAINER');
 
--- step 2: with the joins the query actually uses
-SELECT fr.id, fr.athlete_id, fr.comment, a.id AS athlete_pk, a.user_id, u.id AS user_pk
-FROM facility_reaction fr
-JOIN athlete a ON fr.athlete_id = a.id
-JOIN user u ON a.user_id = u.id
-WHERE fr.facility_id = 1 AND fr.type = 'COMMENT';
+-- Trainer profile
+INSERT INTO trainer (user_id, specialization, price_per_hour, facility_id)
+VALUES (50, 'Strength & Conditioning', 25.00, 1);
+
+-- Trainer's sport(s)
+INSERT INTO trainer_sport (trainer_id, sport_id)
+VALUES (50, 1);
+
+-- A second trainer for the same facility/sport, to test the list rendering
+INSERT INTO user (id, username, firstname, lastname, email, password, profile_image, role)
+VALUES (51, 'ana_jov', 'Ana', 'Jovanović', 'ana.trainer@test.com', '5, jelena_w, $2a$10$AR9Cz8q3O4O/rkmvKjYUQeYvZhir87nBjZ7AcEDUyL6mH20zA.1MS, Jelena, Stanić, jelena@email.com, +381641234567, , APPROVED, WORKER, 2026-06-17 12:34:53
+', 'trainer2.jpg', 'TRAINER');
+
+INSERT INTO trainer (user_id, specialization, price_per_hour, facility_id)
+VALUES (51, 'Basketball Coaching', 30.00, 1);
+
+INSERT INTO trainer_sport (trainer_id, sport_id)
+VALUES (51, 1);
+
+-- Individual trainings for athlete_id = 1 (one past = COMPLETED, one future = SCHEDULED)
+INSERT INTO individual_training (athlete_id, trainer_id, facility_id, sport_id, scheduled_at)
+VALUES (1, 50, 1, 1, '2026-06-20 10:00:00');
+
+INSERT INTO individual_training (athlete_id, trainer_id, facility_id, sport_id, scheduled_at)
+VALUES (1, 51, 1, 1, '2026-07-15 14:00:00');
+
+CREATE TABLE trainer (
+    user_id INT PRIMARY KEY,              -- FK -> user.id (trainer logs in as a user)
+    specialization VARCHAR(255),
+    price_per_hour DECIMAL(10,2),
+    facility_id INT NOT NULL,             -- FK -> facility.id (facility they work at)
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (facility_id) REFERENCES facility(id)
+);
+
+CREATE TABLE trainer_sport (
+    trainer_id INT NOT NULL,
+    sport_id INT NOT NULL,
+    PRIMARY KEY (trainer_id, sport_id),
+    FOREIGN KEY (trainer_id) REFERENCES trainer(user_id),
+    FOREIGN KEY (sport_id) REFERENCES sport(id)
+);
+
+CREATE TABLE individual_training (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    athlete_id INT NOT NULL,
+    trainer_id INT NOT NULL,
+    facility_id INT NOT NULL,
+    sport_id INT NOT NULL,
+    scheduled_at DATETIME NOT NULL,
+    status VARCHAR(20) NOT NULL,          -- e.g. 'SCHEDULED', 'COMPLETED', 'CANCELLED'
+    FOREIGN KEY (athlete_id) REFERENCES user(id),
+    FOREIGN KEY (trainer_id) REFERENCES trainer(user_id),
+    FOREIGN KEY (facility_id) REFERENCES facility(id),
+    FOREIGN KEY (sport_id) REFERENCES sport(id)
+);
 
 INSERT INTO facility_reaction (facility_id, athlete_id, type, comment, created_at) VALUES
 -- facility 1 (most comments here)
@@ -163,6 +213,10 @@ VALUES
 (5, 1, 'REJECTED');
 
 TRUNCATE TABLE reservation;
+
+INSERT INTO reservation (court_id, athlete_id, sport_id, date, time_from, time_to, status) VALUES
+(1, 1, 3, '2026-05-23', '18:00:00', '19:00:00', 'CONFIRMED'),
+(1, 1, 3, '2026-05-25', '10:00:00', '11:00:00', 'CONFIRMED');
 
 INSERT INTO reservation (id, court_id, athlete_id, sport_id, date, time_from, time_to, status) VALUES
 (1, 1, 1, 1, '2026-06-23', '18:00:00', '19:00:00', 'CONFIRMED'),

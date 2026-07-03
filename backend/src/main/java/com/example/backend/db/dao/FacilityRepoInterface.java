@@ -10,7 +10,7 @@ public interface FacilityRepoInterface {
     public List<Facility> getTop3Facilities();
     // public int getNumOfLikes(int id);
 
-    public List<String> getAllSports();
+    public List<String> getAllSports(); // vraca niz stringova naziva sporta
     public List<Sport> getAllSportsObject();
     public List<String> getActiveCities();
     
