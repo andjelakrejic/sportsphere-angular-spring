@@ -1,7 +1,7 @@
 package com.example.backend.models;
 
 public class Trainer {
-    private int userId;
+    private int id; // userId
     private String firstName;
     private String lastName;
     private String image;
@@ -13,10 +13,10 @@ public class Trainer {
 
     public Trainer() {}
 
-    public Trainer(int userId, String firstName, String lastName, String image,
+    public Trainer(int id, String firstName, String lastName, String image,
                     String specialization, double pricePerHour,
                     int facilityId, String facilityName, double averageRating) {
-        this.userId = userId;
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.image = image;
@@ -27,12 +27,12 @@ public class Trainer {
         this.averageRating = averageRating;
     }
     
-    public int getUserId() {
-        return userId;
+    public int getid() {
+        return id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setid(int id) {
+        this.id = id;
     }
 
     public String getFirstName() {

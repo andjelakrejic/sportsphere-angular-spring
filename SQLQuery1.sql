@@ -1,3 +1,9 @@
+SELECT id, scheduled_at, NOW() FROM individual_training;
+
+SELECT id, scheduled_at, 
+       CASE WHEN scheduled_at < NOW() THEN 'COMPLETED' ELSE 'SCHEDULED' END AS status
+FROM individual_training;
+
 -- Trainer needs a user account first (assuming user id 50 doesn't exist yet)
 INSERT INTO user (id, username, firstname, lastname, email, password, profile_image, role)
 VALUES (50, 'marko_pet', 'Marko', 'Petrović', 'marko.trainer@test.com', '$2a$10$dummyhashforsakeoftesting', 'trainer1.jpg', 'TRAINER');

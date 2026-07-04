@@ -18,7 +18,7 @@ import com.example.backend.models.IndividualTraining;
 @CrossOrigin(origins = "http://localhost:4200")
 public class IndividualTrainingController {
 
-    @PostMapping
+    @PostMapping("/bookTraining")
     public boolean bookTraining(@RequestBody IndividualTraining training) {
         return new IndividualTrainingRepo().bookTraining(
                 training.getAthleteId(),

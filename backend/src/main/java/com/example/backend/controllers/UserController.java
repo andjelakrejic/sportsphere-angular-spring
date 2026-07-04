@@ -1,7 +1,5 @@
 package com.example.backend.controllers;
 
-import java.util.List;
-
 // import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.db.dao.UserRepo;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
@@ -25,16 +24,6 @@ import com.example.backend.models.helpers.FavoriteSportsObject;
 @RequestMapping("/users")
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
-
-    // @PostMapping("/loginAthlete")
-    // public Athlete loginAthlete(@RequestBody Athlete a) {
-    //     return new UserRepo().loginAthlete(a);
-    // }
-
-    // @PostMapping("/loginWorker")
-    // public Worker loginWorker(@RequestBody Worker w) {
-    //     return new UserRepo().loginWorker(w);
-    // }
 
     // ovo gore ne radi zbog hesiranja lozinke..
     @PostMapping("/loginAthlete")
@@ -100,8 +89,10 @@ public class UserController {
         return new UserRepo().changePassword(obj);
     }
 
-    @GetMapping("/getAllSports")
-    public List<Sport> getAllSports() {
-        return new UserRepo().getAllSports();
+    // UserController.java
+    @PostMapping("/uploadProfileImage")
+    public String uploadProfileImage(@RequestParam String username,
+                                    @RequestParam MultipartFile image) {
+        return new UserRepo().uploadProfileImage(username, image);
     }
 }

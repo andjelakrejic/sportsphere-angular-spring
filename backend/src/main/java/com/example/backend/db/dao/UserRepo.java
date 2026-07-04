@@ -1,25 +1,29 @@
 package com.example.backend.db.dao;
 
 import java.sql.Statement;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.db.DB;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
 
 public class UserRepo implements UserRepoInterface {
     
+    @Override
     public Athlete loginAthlete(Athlete a) {    
         try (Connection conn = DB.source().getConnection();
          PreparedStatement stm = conn.prepareStatement(
@@ -95,6 +99,31 @@ public class UserRepo implements UserRepoInterface {
         return null;
     }
 
+    @Override
+    public String uploadProfileImage(String username, MultipartFile image) {
+        try {
+            String uploadDir = "images/";
+            Files.createDirectories(Paths.get(uploadDir));
+
+            String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + filename);
+            Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            try (Connection conn = DB.source().getConnection();
+                PreparedStatement stm = conn.prepareStatement(
+                        "UPDATE user SET profile_image=? WHERE username=?")) {
+                stm.setString(1, filename);
+                stm.setString(2, username);
+                stm.executeUpdate();
+            }
+
+            return filename;
+
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     @Override
     public int registerAthlete(Athlete a) {
         try (Connection conn = DB.source().getConnection()) {
@@ -291,6 +320,7 @@ public class UserRepo implements UserRepoInterface {
 
 
     // 1. Update osnovnih podataka (bez username-a)
+    @Override
     public Message updateAthlete(Athlete a) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
@@ -312,23 +342,23 @@ public class UserRepo implements UserRepoInterface {
         }
     }
 
-    // 2. Update omiljenih sportova — delete/insert pattern
+    @Override
     public Message updateFavoriteSports(FavoriteSportsObject obj) {
         try (Connection conn = DB.source().getConnection()) {
-            
-            // Obrisi stare
+
+            // Obriši stare
             try (PreparedStatement del = conn.prepareStatement(
-                    "DELETE FROM athlete_sport WHERE username=?")) {
-                del.setString(1, obj.getUsername());
+                    "DELETE FROM athlete_sport WHERE athlete_id=?")) {
+                del.setInt(1, obj.getAthleteId());
                 del.executeUpdate();
             }
 
             // Ubaci nove
             try (PreparedStatement ins = conn.prepareStatement(
-                    "INSERT INTO athlete_sport (username, sport) VALUES (?, ?)")) {
-                for (String sport : obj.getSports()) {
-                    ins.setString(1, obj.getUsername());
-                    ins.setString(2, sport);
+                    "INSERT INTO athlete_sport (athlete_id, sport_id) VALUES (?, ?)")) {
+                for (int sportId : obj.getSportIds()) {
+                    ins.setInt(1, obj.getAthleteId());
+                    ins.setInt(2, sportId);
                     ins.addBatch();
                 }
                 ins.executeBatch();
@@ -367,29 +397,6 @@ public class UserRepo implements UserRepoInterface {
             e.printStackTrace();
             return null;
         }
-    }
-
-    @Override
-    public List<Sport> getAllSports() {
-       try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("select * from sport");
-        ) {
-            List<Sport> sports = new ArrayList<>();
-            
-            ResultSet rs = stm.executeQuery();
-            while(rs.next()){
-                Sport s = new Sport(
-                    rs.getInt("id"),
-                    rs.getString("name")
-                );
-                sports.add(s);
-            }
-
-            return sports;
-       } catch (SQLException e) {
-            e.printStackTrace();
-       }
-       return null;
     }
 
 }

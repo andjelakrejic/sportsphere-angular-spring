@@ -1,34 +1,15 @@
 package com.example.backend.models.helpers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FavoriteSportsObject {
-    String username;
-    List<String> sports;
+    private int athleteId;
+    private List<Integer> sportIds;
     
-    public FavoriteSportsObject(String username, List<String> sports) {
-        this.sports = new ArrayList<>();
-        this.username = username;
-        this.sports = sports;
-    }
 
-    public String getUsername() {
-        return username;
-    }
+    public int getAthleteId() { return athleteId; }
+    public void setAthleteId(int athleteId) { this.athleteId = athleteId; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public List<String> getSports() {
-        return sports;
-    }
-
-    public void setSports(List<String> sports) {
-        this.sports = sports;
-    }
-
-    
-    
+    public List<Integer> getSportIds() { return sportIds; }
+    public void setSportIds(List<Integer> sportIds) { this.sportIds = sportIds; }
 }

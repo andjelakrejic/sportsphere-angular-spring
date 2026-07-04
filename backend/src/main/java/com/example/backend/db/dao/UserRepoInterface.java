@@ -1,10 +1,9 @@
 package com.example.backend.db.dao;
 
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
@@ -16,6 +15,7 @@ public interface UserRepoInterface {
     
     public int registerAthlete(Athlete a);
     public int registerWorker(Worker w);
+    public String uploadProfileImage(String username, MultipartFile image);
     // public int registerAthleteWithImage(Athlete a);
     // public int registerWorkerWithImage(Worker w);
 
@@ -26,8 +26,5 @@ public interface UserRepoInterface {
     public Message updateAthlete(Athlete a);
     public Message updateFavoriteSports(FavoriteSportsObject obj);
     public Message changePassword(ChangePasswordObject obj);
-
-    public List<Sport> getAllSports();
-
 
 }
