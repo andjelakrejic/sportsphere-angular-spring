@@ -78,4 +78,15 @@ public class TeammateController {
         return new TeammateRepo().getMySentRequests(athleteId);
     }
 
+
+    @GetMapping("/getMyTeams/{athleteId}")
+    public List<TeammateAd> getMyTeams(@PathVariable int athleteId) {
+        return new TeammateRepo().getMyTeams(athleteId);
+    }
+
+    @GetMapping("/getApprovedPlayers/{adId}")
+    public List<TeammateRequest> getApprovedPlayers(@PathVariable int adId) {
+        return new TeammateRepo().getApprovedPlayers(adId);
+    }
+
 }

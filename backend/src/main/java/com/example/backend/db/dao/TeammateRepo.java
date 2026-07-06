@@ -17,29 +17,20 @@ public class TeammateRepo implements TeammateRepoInterface {
     @Override
     public List<TeammateAd> getTeammateAds(int athleteId) {
         try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("SELECT * FROM teammate_ad WHERE status = 'ACTIVE' and athlete_id=?")
+            PreparedStatement stm = conn.prepareStatement("SELECT * FROM teammate_ad WHERE athlete_id=? ORDER BY created_at DESC")
         ) {
             stm.setInt(1, athleteId);
-
             List<TeammateAd> ads = new ArrayList<>();
-
             ResultSet rs = stm.executeQuery();
             while(rs.next()){
-                TeammateAd ta = new TeammateAd(
-                    rs.getInt("id"), 
-                    rs.getInt("athlete_id"),
-                    rs.getInt("sport_id"),
-                    rs.getString("city"),
-                    rs.getString("date"),
-                    rs.getString("time_slot"),
-                    rs.getInt("total_players_needed"),
-                    rs.getInt("missing_players"),
-                    rs.getString("status"),
-                    rs.getString("created_at")
-                );
-                ads.add(ta);
+                ads.add(new TeammateAd(
+                    rs.getInt("id"), rs.getInt("athlete_id"), rs.getInt("sport_id"),
+                    rs.getString("city"), rs.getString("date"), rs.getString("time_slot"),
+                    rs.getInt("total_players_needed"), rs.getInt("missing_players"),
+                    rs.getString("status"), rs.getString("created_at")
+                ));
             }
-            return ads;   
+            return ads;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -276,6 +267,56 @@ public class TeammateRepo implements TeammateRepoInterface {
                 e.printStackTrace();
             }
             return null;
+    }
+
+    @Override
+    public List<TeammateAd> getMyTeams(int athleteId) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT DISTINCT ta.* FROM teammate_ad ta " +
+                "LEFT JOIN teammate_request tr ON tr.ad_id = ta.id AND tr.status = 'APPROVED' " +
+                "WHERE (ta.athlete_id = ? OR tr.athlete_id = ?) AND ta.missing_players = 0 " +
+                "ORDER BY ta.created_at DESC")
+        ) {
+            stm.setInt(1, athleteId);
+            stm.setInt(2, athleteId);
+            List<TeammateAd> ads = new ArrayList<>();
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                ads.add(new TeammateAd(
+                    rs.getInt("id"), rs.getInt("athlete_id"), rs.getInt("sport_id"),
+                    rs.getString("city"), rs.getString("date"), rs.getString("time_slot"),
+                    rs.getInt("total_players_needed"), rs.getInt("missing_players"),
+                    rs.getString("status"), rs.getString("created_at")
+                ));
+            }
+            return ads;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<TeammateRequest> getApprovedPlayers(int adId) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT * FROM teammate_request WHERE ad_id=? AND status='APPROVED'")
+        ) {
+            stm.setInt(1, adId);
+            List<TeammateRequest> requests = new ArrayList<>();
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                requests.add(new TeammateRequest(
+                    rs.getInt("id"), rs.getInt("ad_id"), rs.getInt("athlete_id"),
+                    rs.getString("status"), rs.getString("created_at")
+                ));
+            }
+            return requests;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
 }

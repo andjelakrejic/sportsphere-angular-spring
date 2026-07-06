@@ -39,6 +39,8 @@ public class TeammateAd {
         this.createdAt = createdAt;
     }
 
+    public TeammateAd() {}
+
     
     public int getId() {
         return id;

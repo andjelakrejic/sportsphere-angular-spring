@@ -22,6 +22,8 @@ public interface TeammateRepoInterface {
     public Message rejectRequest(int requestId);
     public List<Integer> getMySentRequests(int athleteId);
 
+    public List<TeammateAd> getMyTeams(int athleteId);
+    public List<TeammateRequest> getApprovedPlayers(int adId);
 
 
 }
