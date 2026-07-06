@@ -27,4 +27,12 @@ public interface UserRepoInterface {
     public Message updateFavoriteSports(FavoriteSportsObject obj);
     public Message changePassword(ChangePasswordObject obj);
 
+    // Register
+
+    public boolean usernameExists(String username);
+    public boolean emailExists(String email);
+    public boolean maticniBrojExists(String mb);
+    public boolean pibExists(String pib);
+    public void addFavoriteSport(int athleteId, int sportId);
+    public int countWorkersAtFacility(String facilityName, String address);
 }

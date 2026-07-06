@@ -123,116 +123,7 @@ public class UserRepo implements UserRepoInterface {
             e.printStackTrace();
             return null;
         }
-    }
-    @Override
-    public int registerAthlete(Athlete a) {
-        try (Connection conn = DB.source().getConnection()) {
-            conn.setAutoCommit(false); // transakcija - oba inserta ili nijedan
-
-            // 1. insert u user tabelu
-            String userSql = "INSERT INTO user (username, password, ime, prezime, email, telefon, profile_image, status, role) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stm1 = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
-
-            String hashedPassword = BCrypt.hashpw(a.getPassword(), BCrypt.gensalt());
-
-            stm1.setString(1, a.getUsername());
-            stm1.setString(2, hashedPassword);
-            stm1.setString(3, a.getFirstname());
-            stm1.setString(4, a.getLastname());
-            stm1.setString(5, a.getEmail());
-            stm1.setString(6, a.getPhone());
-            stm1.setString(7, a.getProfileImage() != null ? a.getProfileImage() : "/images/default-avatar.png");
-            stm1.setString(8, "PENDING");
-            stm1.setString(9, "ATHLETE");
-
-            int rows = stm1.executeUpdate();
-            if (rows == 0) {
-                conn.rollback();
-                return 0;
-            }
-
-            // 2. uzmi generisani user_id
-            ResultSet generatedKeys = stm1.getGeneratedKeys();
-            int userId;
-            if (generatedKeys.next()) {
-                userId = generatedKeys.getInt(1);
-            } else {
-                conn.rollback();
-                return 0;
-            }
-
-            // 3. insert u athlete tabelu
-            PreparedStatement stm2 = conn.prepareStatement(
-                "INSERT INTO athlete (user_id) VALUES (?)"
-            );
-            stm2.setInt(1, userId);
-            stm2.executeUpdate();
-
-            conn.commit();
-            return userId;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    @Override
-    public int registerWorker(Worker w) {
-        try (Connection conn = DB.source().getConnection()) {
-            conn.setAutoCommit(false);
-
-            String userSql = "INSERT INTO user (username, password, ime, prezime, email, telefon, profile_image, status, role) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stm1 = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
-
-            String hashedPassword = BCrypt.hashpw(w.getPassword(), BCrypt.gensalt());
-
-            stm1.setString(1, w.getUsername());
-            stm1.setString(2, hashedPassword);
-            stm1.setString(3, w.getFirstname());
-            stm1.setString(4, w.getLastname());
-            stm1.setString(5, w.getEmail());
-            stm1.setString(6, w.getPhone());
-            stm1.setString(7, w.getProfileImage() != null ? w.getProfileImage() : "/images/default-avatar.png");
-            stm1.setString(8, "PENDING");
-            stm1.setString(9, "WORKER");
-
-            int rows = stm1.executeUpdate();
-            if (rows == 0) {
-                conn.rollback();
-                return 0;
-            }
-
-            ResultSet generatedKeys = stm1.getGeneratedKeys();
-            int userId;
-            if (generatedKeys.next()) {
-                userId = generatedKeys.getInt(1);
-            } else {
-                conn.rollback();
-                return 0;
-            }
-
-            PreparedStatement stm2 = conn.prepareStatement(
-                "INSERT INTO worker (user_id, naziv_objekta, adresa, maticni_broj, pib) VALUES (?, ?, ?, ?, ?)"
-            );
-            stm2.setInt(1, userId);
-            stm2.setString(2, w.getFacilityName());
-            stm2.setString(3, w.getAddress());
-            stm2.setString(4, w.getRegistrationNumber());
-            stm2.setString(5, w.getTaxId());
-            stm2.executeUpdate();
-
-            conn.commit();
-            return userId;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-    
+    }  
 
 
     @Override
@@ -397,6 +288,214 @@ public class UserRepo implements UserRepoInterface {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // Register
+
+    @Override
+    public int registerAthlete(Athlete a) {
+        try (Connection conn = DB.source().getConnection()) {
+            conn.setAutoCommit(false); // transakcija - oba inserta ili nijedan
+
+            // 1. insert u user tabelu
+            String userSql = "INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stm1 = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
+
+            String hashedPassword = BCrypt.hashpw(a.getPassword(), BCrypt.gensalt());
+
+            stm1.setString(1, a.getUsername());
+            stm1.setString(2, hashedPassword);
+            stm1.setString(3, a.getFirstname());
+            stm1.setString(4, a.getLastname());
+            stm1.setString(5, a.getEmail());
+            stm1.setString(6, a.getPhone());
+            stm1.setString(7, a.getProfileImage() != null ? a.getProfileImage() : "default-avatar.png");
+            stm1.setString(8, "PENDING");
+            stm1.setString(9, "ATHLETE");
+
+            int rows = stm1.executeUpdate();
+            if (rows == 0) {
+                conn.rollback();
+                return 0;
+            }
+
+            // 2. uzmi generisani user_id
+            ResultSet generatedKeys = stm1.getGeneratedKeys();
+            int userId;
+            if (generatedKeys.next()) {
+                userId = generatedKeys.getInt(1);
+            } else {
+                conn.rollback();
+                return 0;
+            }
+
+            // 3. insert u athlete tabelu
+            PreparedStatement stm2 = conn.prepareStatement(
+                "INSERT INTO athlete (user_id) VALUES (?)"
+            );
+            stm2.setInt(1, userId);
+            stm2.executeUpdate();
+
+            conn.commit();
+            return userId;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int registerWorker(Worker w) {
+        try (Connection conn = DB.source().getConnection()) {
+            conn.setAutoCommit(false);
+
+            String userSql = "INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement stm1 = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
+
+            String hashedPassword = BCrypt.hashpw(w.getPassword(), BCrypt.gensalt());
+
+            stm1.setString(1, w.getUsername());
+            stm1.setString(2, hashedPassword);
+            stm1.setString(3, w.getFirstname());
+            stm1.setString(4, w.getLastname());
+            stm1.setString(5, w.getEmail());
+            stm1.setString(6, w.getPhone());
+            stm1.setString(7, w.getProfileImage() != null ? w.getProfileImage() : "default-avatar.png");
+            stm1.setString(8, "PENDING");
+            stm1.setString(9, "WORKER");
+
+            int rows = stm1.executeUpdate();
+            if (rows == 0) {
+                conn.rollback();
+                return 0;
+            }
+
+            ResultSet generatedKeys = stm1.getGeneratedKeys();
+            int userId;
+            if (generatedKeys.next()) {
+                userId = generatedKeys.getInt(1);
+            } else {
+                conn.rollback();
+                return 0;
+            }
+
+            PreparedStatement stm2 = conn.prepareStatement(
+                "INSERT INTO worker (user_id, facility_name, address, registration_number, tax_id) VALUES (?, ?, ?, ?, ?)"
+            );
+            stm2.setInt(1, userId);
+            stm2.setString(2, w.getFacilityName());
+            stm2.setString(3, w.getAddress());
+            stm2.setString(4, w.getRegistrationNumber());
+            stm2.setString(5, w.getTaxId());
+            stm2.executeUpdate();
+
+            conn.commit();
+            return userId;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean usernameExists(String username) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT id FROM user WHERE username = ? AND status != 'REJECTED'")
+        ) {
+            stm.setString(1, username);
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {  
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT id FROM user WHERE email = ? AND status != 'REJECTED'")
+        ) {
+            stm.setString(1, email);
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean maticniBrojExists(String mb) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
+                "WHERE w.registration_number = ? AND u.status != 'REJECTED'")
+        ) {
+            stm.setString(1, mb);
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pibExists(String pib) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
+                "WHERE w.tax_id = ? AND u.status != 'REJECTED'")
+        ) {
+            stm.setString(1, pib);
+            ResultSet rs = stm.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public void addFavoriteSport(int athleteId, int sportId) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "INSERT INTO athlete_sport (athlete_id, sport_id) VALUES (?, ?)")
+        ) {
+            stm.setInt(1, athleteId);
+            stm.setInt(2, sportId);
+            stm.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public int countWorkersAtFacility(String facilityName, String address) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT COUNT(*) FROM worker w JOIN user u ON w.user_id = u.id " +
+                "WHERE LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) " +
+                "AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)) " +
+                "AND u.status != 'REJECTED'")
+        ) {
+            stm.setString(1, facilityName);
+            stm.setString(2, address);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 999; // fail-safe: ako provera pukne, blokiraj registraciju umesto da propusti treći
     }
 
 }

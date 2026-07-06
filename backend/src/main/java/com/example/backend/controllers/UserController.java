@@ -1,5 +1,10 @@
 package com.example.backend.controllers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.springframework.http.MediaType;
 // import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.backend.db.dao.UserRepo;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
+import com.example.backend.models.Sport;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/users")
@@ -42,16 +49,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/registerAthlete")
-    public int registerAthlete(@RequestBody Athlete a) {
-        return new UserRepo().registerAthlete(a);
-    }
-    
-    @PostMapping("/registerWorker")
-    public int registerWorker(@RequestBody Worker w) {
-        return new UserRepo().registerWorker(w);
     }
 
     // @GetMapping("/hashTest")
@@ -89,10 +86,133 @@ public class UserController {
         return new UserRepo().changePassword(obj);
     }
 
-    // UserController.java
     @PostMapping("/uploadProfileImage")
     public String uploadProfileImage(@RequestParam String username,
                                     @RequestParam MultipartFile image) {
         return new UserRepo().uploadProfileImage(username, image);
     }
+
+    // Register
+    @PostMapping(value = "/registerAthlete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> registerAthlete(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam String firstname,
+            @RequestParam String lastname,
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam(required = false) String favoriteSports,
+            @RequestParam(required = false) MultipartFile image
+    ) {
+        UserRepo repo = new UserRepo();
+
+        if (repo.usernameExists(username)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Username already taken."));
+        }
+        if (repo.emailExists(email)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Email already registered."));
+        }
+
+        Athlete a = new Athlete();
+        a.setUsername(username);
+        a.setPassword(password);
+        a.setFirstname(firstname);
+        a.setLastname(lastname);
+        a.setEmail(email);
+        a.setPhone(phone);
+
+        if (image != null && !image.isEmpty()) {
+            try {
+                String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                Files.write(Paths.get("images/" + filename), image.getBytes());
+                a.setProfileImage(filename);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int userId = repo.registerAthlete(a);
+
+        if (userId > 0 && favoriteSports != null && !favoriteSports.isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Sport[] sports = mapper.readValue(favoriteSports, Sport[].class);
+                for (Sport s : sports) {
+                    repo.addFavoriteSport(userId, s.getId());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (userId > 0) {
+            return ResponseEntity.ok(userId);
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
+    }
+
+    @PostMapping(value = "/registerWorker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> registerWorker(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam String firstname,
+            @RequestParam String lastname,
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam String nameOfPlace,
+            @RequestParam String address,
+            @RequestParam String mb,
+            @RequestParam String pib,
+            @RequestParam(required = false) MultipartFile image
+    ) {
+        UserRepo repo = new UserRepo();
+
+        if (repo.usernameExists(username)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Username already taken."));
+        }
+        if (repo.emailExists(email)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Email already registered."));
+        }
+        if (repo.maticniBrojExists(mb)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Registration number already in use."));
+        }
+        if (repo.pibExists(pib)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Tax ID already in use."));
+        }
+        if (repo.countWorkersAtFacility(nameOfPlace, address) >= 2) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new Message("This facility already has the maximum number of registered employees (2)."));
+        }
+
+        Worker w = new Worker();
+        w.setUsername(username);
+        w.setPassword(password);
+        w.setFirstname(firstname);
+        w.setLastname(lastname);
+        w.setEmail(email);
+        w.setPhone(phone);
+        w.setFacilityName(nameOfPlace);
+        w.setAddress(address);
+        w.setRegistrationNumber(mb);
+        w.setTaxId(pib);
+
+        if (image != null && !image.isEmpty()) {
+            try {
+                String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                Files.write(Paths.get("images/" + filename), image.getBytes());
+                w.setProfileImage(filename);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int userId = repo.registerWorker(w);
+
+        if (userId > 0) {
+            return ResponseEntity.ok(userId);
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
+    }
+
+    
 }
