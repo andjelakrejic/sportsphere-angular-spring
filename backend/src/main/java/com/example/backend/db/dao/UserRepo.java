@@ -1,6 +1,8 @@
 package com.example.backend.db.dao;
 
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.backend.db.DB;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
-import com.example.backend.models.Worker;
+import com.example.backend.models.Sport;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
 
@@ -58,47 +60,7 @@ public class UserRepo implements UserRepoInterface {
         return null;
     }
 
-    @Override
-    public Worker loginWorker(Worker w) {
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement(
-                "SELECT u.id, u.username, u.password, u.firstname, u.lastname, u.email, u.phone, u.profile_image, " +
-                "wk.facility_name, wk.address, wk.registration_number, wk.tax_id " +
-                "FROM user u " +
-                "JOIN worker wk ON u.id = wk.user_id " +
-                "WHERE u.username = ? AND u.role = 'WORKER'"
-            )) {
-
-            stm.setString(1, w.getUsername());
-            ResultSet rs = stm.executeQuery();
-
-            if (rs.next()) {
-                String hashInDb = rs.getString("password");
-                boolean match = BCrypt.checkpw(w.getPassword(), hashInDb);
-                if (!match) return null;
-                
-                return new Worker(
-                    rs.getInt("id"),
-                    rs.getString("username"),
-                    rs.getString("password"),
-                    rs.getString("firstname"),
-                    rs.getString("lastname"),
-                    rs.getString("email"),
-                    rs.getString("phone"),
-                    rs.getString("profile_image"),
-                    rs.getString("facility_name"),
-                    rs.getString("address"),
-                    rs.getString("registration_number"),
-                    rs.getString("tax_id")
-                );
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
+    
     @Override
     public String uploadProfileImage(String username, MultipartFile image) {
         try {
@@ -124,38 +86,6 @@ public class UserRepo implements UserRepoInterface {
             return null;
         }
     }  
-
-
-    @Override
-    public Worker getWorker(String username) {
-         try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("select * from worker where username=?");
-        ) {
-            stm.setString(1, username);
-            ResultSet rs = stm.executeQuery();
-
-            if(rs.next()){
-                return new Worker(
-                    rs.getInt("id"),
-                    rs.getString("username"),
-                    rs.getString("password"),
-                    rs.getString("firstname"),
-                    rs.getString("lastname"),
-                    rs.getString("email"),
-                    rs.getString("phone"),
-                    rs.getString("profile_image"),
-                    rs.getString("facility_name"),
-                    rs.getString("address"),
-                    rs.getString("registration_number"),
-                    rs.getString("tax_id")
-                );
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     @Override
     public Athlete getAthlete(String username) { // ne dohvata favoritesports iz tabele athlete_sport to dodaj jer ne radi athlete_profile u frontu
@@ -346,60 +276,6 @@ public class UserRepo implements UserRepoInterface {
         return 0;
     }
 
-    @Override
-    public int registerWorker(Worker w) {
-        try (Connection conn = DB.source().getConnection()) {
-            conn.setAutoCommit(false);
-
-            String userSql = "INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stm1 = conn.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
-
-            String hashedPassword = BCrypt.hashpw(w.getPassword(), BCrypt.gensalt());
-
-            stm1.setString(1, w.getUsername());
-            stm1.setString(2, hashedPassword);
-            stm1.setString(3, w.getFirstname());
-            stm1.setString(4, w.getLastname());
-            stm1.setString(5, w.getEmail());
-            stm1.setString(6, w.getPhone());
-            stm1.setString(7, w.getProfileImage() != null ? w.getProfileImage() : "default-avatar.png");
-            stm1.setString(8, "PENDING");
-            stm1.setString(9, "WORKER");
-
-            int rows = stm1.executeUpdate();
-            if (rows == 0) {
-                conn.rollback();
-                return 0;
-            }
-
-            ResultSet generatedKeys = stm1.getGeneratedKeys();
-            int userId;
-            if (generatedKeys.next()) {
-                userId = generatedKeys.getInt(1);
-            } else {
-                conn.rollback();
-                return 0;
-            }
-
-            PreparedStatement stm2 = conn.prepareStatement(
-                "INSERT INTO worker (user_id, facility_name, address, registration_number, tax_id) VALUES (?, ?, ?, ?, ?)"
-            );
-            stm2.setInt(1, userId);
-            stm2.setString(2, w.getFacilityName());
-            stm2.setString(3, w.getAddress());
-            stm2.setString(4, w.getRegistrationNumber());
-            stm2.setString(5, w.getTaxId());
-            stm2.executeUpdate();
-
-            conn.commit();
-            return userId;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
 
     @Override
     public boolean usernameExists(String username) {
@@ -431,37 +307,6 @@ public class UserRepo implements UserRepoInterface {
         return true;
     }
 
-    @Override
-    public boolean maticniBrojExists(String mb) {
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement(
-                "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE w.registration_number = ? AND u.status != 'REJECTED'")
-        ) {
-            stm.setString(1, mb);
-            ResultSet rs = stm.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    @Override
-    public boolean pibExists(String pib) {
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement(
-                "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE w.tax_id = ? AND u.status != 'REJECTED'")
-        ) {
-            stm.setString(1, pib);
-            ResultSet rs = stm.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
 
     @Override
     public void addFavoriteSport(int athleteId, int sportId) {
@@ -477,25 +322,34 @@ public class UserRepo implements UserRepoInterface {
         }
     }
 
+
     @Override
-    public int countWorkersAtFacility(String facilityName, String address) {
+    public List<Sport> getFavoriteSports(int id) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
-                "SELECT COUNT(*) FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) " +
-                "AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)) " +
-                "AND u.status != 'REJECTED'")
+                "SELECT * " +
+                "FROM sport s " +
+                "JOIN athlete_sport a ON s.id = a.sport_id " +
+                "WHERE a.athlete_id = ?"
+            );
         ) {
-            stm.setString(1, facilityName);
-            stm.setString(2, address);
+            stm.setInt(1, id);
+
+            List<Sport> sports = new ArrayList<>();
+            
             ResultSet rs = stm.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
+            while (rs.next()) {
+                Sport s = new Sport(
+                    rs.getInt("id"),
+                    rs.getString("name")
+                );
+                sports.add(s);
             }
+            return sports;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 999; // fail-safe: ako provera pukne, blokiraj registraciju umesto da propusti treći
+        return null;
     }
 
 }

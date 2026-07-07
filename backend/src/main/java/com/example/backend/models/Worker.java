@@ -5,6 +5,15 @@ public class Worker extends User{
     private String address;
     private String registrationNumber;
     private String taxId;
+     private Integer facilityId;
+
+    public Integer getFacilityId() {
+        return facilityId;
+    }
+
+     public void setFacilityId(Integer facilityId) {
+         this.facilityId = facilityId;
+     }
 
     public Worker() {}
 

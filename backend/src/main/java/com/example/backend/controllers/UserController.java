@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.springframework.http.MediaType;
 // import org.mindrot.jbcrypt.BCrypt;
@@ -22,7 +23,6 @@ import com.example.backend.db.dao.UserRepo;
 import com.example.backend.models.Athlete;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
-import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,14 +42,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/loginWorker")
-    public ResponseEntity<Worker> loginWorker(@RequestBody Worker w) {
-        Worker result = new UserRepo().loginWorker(w);
-        if (result == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return ResponseEntity.ok(result);
-    }
+    
 
     // @GetMapping("/hashTest")
     // public String hashTest() {
@@ -64,11 +57,6 @@ public class UserController {
     @GetMapping("/getAthleteById/{id}")
     public Athlete getAthleteById(@PathVariable int id) {
         return new UserRepo().getAthleteById(id);
-    }
-
-    @GetMapping("/getWorker/{username}")
-    public Worker getWorker(@PathVariable String username) {
-        return new UserRepo().getWorker(username);
     }
 
     @PostMapping("/updateAthlete")
@@ -151,68 +139,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
     }
 
-    @PostMapping(value = "/registerWorker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> registerWorker(
-            @RequestParam String username,
-            @RequestParam String password,
-            @RequestParam String firstname,
-            @RequestParam String lastname,
-            @RequestParam String email,
-            @RequestParam String phone,
-            @RequestParam String nameOfPlace,
-            @RequestParam String address,
-            @RequestParam String mb,
-            @RequestParam String pib,
-            @RequestParam(required = false) MultipartFile image
-    ) {
-        UserRepo repo = new UserRepo();
-
-        if (repo.usernameExists(username)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Username already taken."));
-        }
-        if (repo.emailExists(email)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Email already registered."));
-        }
-        if (repo.maticniBrojExists(mb)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Registration number already in use."));
-        }
-        if (repo.pibExists(pib)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Tax ID already in use."));
-        }
-        if (repo.countWorkersAtFacility(nameOfPlace, address) >= 2) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new Message("This facility already has the maximum number of registered employees (2)."));
-        }
-
-        Worker w = new Worker();
-        w.setUsername(username);
-        w.setPassword(password);
-        w.setFirstname(firstname);
-        w.setLastname(lastname);
-        w.setEmail(email);
-        w.setPhone(phone);
-        w.setFacilityName(nameOfPlace);
-        w.setAddress(address);
-        w.setRegistrationNumber(mb);
-        w.setTaxId(pib);
-
-        if (image != null && !image.isEmpty()) {
-            try {
-                String filename = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-                Files.write(Paths.get("images/" + filename), image.getBytes());
-                w.setProfileImage(filename);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        int userId = repo.registerWorker(w);
-
-        if (userId > 0) {
-            return ResponseEntity.ok(userId);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
+    @GetMapping("/getFavoriteSports/{id}")
+    public List<Sport> getAthlete(@PathVariable int id) {
+        return new UserRepo().getFavoriteSports(id);
     }
-
     
 }
