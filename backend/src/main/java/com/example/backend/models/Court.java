@@ -10,6 +10,8 @@ public class Court {
     private int sportId; // konstruktor je bez njega
 
 
+    public Court() {}
+    
     public Court(int id, int facilityId, String name, String type, int capacity, String equipmentDescription) {
         this.id = id;
         this.facilityId = facilityId;

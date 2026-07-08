@@ -1,17 +1,28 @@
 package com.example.backend.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.db.dao.FacilityRepo;
+import com.example.backend.models.Court;
 import com.example.backend.models.Facility;
+import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.helpers.FacilityUploadDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -33,6 +44,11 @@ public class FacilityController {
     @GetMapping("/getActiveCities")
     public List<String> getActiveCities() {
        return new FacilityRepo().getActiveCities();
+    }
+
+    @GetMapping("/getSportsForFacility/{id}")
+    public List<Sport> getSportsForFacility(@PathVariable int id) {
+       return new FacilityRepo().getSportsForFacility(id);
     }
 
     @GetMapping("/getAllSports")
@@ -75,5 +91,46 @@ public class FacilityController {
         return new FacilityRepo().getFacilityImages(facilityId);
     }
     
+    // worker-facilities
+    @PostMapping("/addFacility")
+    public Message addFacility(@RequestBody FacilityUploadDTO dto, @RequestParam int workerId) {
+        return new FacilityRepo().addFacility(dto, workerId);
+    }
+
+    @PostMapping(value = "/uploadFacilityJson", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Message uploadFacilityJson(@RequestParam("file") MultipartFile file, @RequestParam int workerId) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            FacilityUploadDTO dto = objectMapper.readValue(file.getInputStream(), FacilityUploadDTO.class);
+            return new FacilityRepo().addFacility(dto, workerId);
+        } catch (IOException e) {
+            return new Message(false, "Invalid JSON file: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/updateFacility")
+    public Message updateFacility(@RequestBody Facility facility) {
+        return new FacilityRepo().updateFacility(facility);
+    }
+
+    @GetMapping("/getFacilitiesByWorker/{workerId}")
+    public List<Facility> getFacilitiesByWorker(@PathVariable int workerId) {
+        return new FacilityRepo().getFacilitiesByWorkerId(workerId);
+    }
+
+    @GetMapping("/getCourtsByFacility/{facilityId}")
+    public List<Court> getCourtsByFacility(@PathVariable int facilityId) {
+        return new FacilityRepo().getCourtsByFacilityId(facilityId);
+    }
+
+    @PostMapping("/addCourt")
+    public Message addCourt(@RequestBody Court court) {
+        return new FacilityRepo().addCourt(court);
+    }
+
+    @PutMapping("/updateCourt")
+    public Message updateCourt(@RequestBody Court court) {
+        return new FacilityRepo().updateCourt(court);
+    }
     
 }
