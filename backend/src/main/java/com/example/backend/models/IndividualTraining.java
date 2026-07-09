@@ -8,8 +8,11 @@ public class IndividualTraining {
     private int sportId;
     private String scheduledAt;
     private String status; // SCHEDULED, COMPLETED, CANCELLED
+    private String trainingDate;
+    private String timeFrom;
+    private String timeTo;
 
-    public IndividualTraining() {}
+     public IndividualTraining() {}
 
     public IndividualTraining(int id, int athleteId, int trainerId, int facilityId,
                                int sportId, String scheduledAt, String status) {
@@ -20,6 +23,30 @@ public class IndividualTraining {
         this.sportId = sportId;
         this.scheduledAt = scheduledAt;
         this.status = status;
+    }
+
+    public String getTrainingDate() {
+        return trainingDate;
+    }
+
+    public void setTrainingDate(String trainingDate) {
+        this.trainingDate = trainingDate;
+    }
+
+    public String getTimeFrom() {
+        return timeFrom;
+    }
+
+    public void setTimeFrom(String timeFrom) {
+        this.timeFrom = timeFrom;
+    }
+
+    public String getTimeTo() {
+        return timeTo;
+    }
+
+    public void setTimeTo(String timeTo) {
+        this.timeTo = timeTo;
     }
     
     public int getId() {
