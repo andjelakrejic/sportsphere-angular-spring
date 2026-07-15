@@ -7,7 +7,7 @@ public class Orders {
     private int id;
     private int athleteId;
     private double price;
-    private String status; // ORDERED, PICKED UP, CANCELED
+    private String status; // ORDERED, ACCEPTED, PICKED UP, CANCELED, 
     private String createdAt;
     private List<EquipmentOrders> items;
     

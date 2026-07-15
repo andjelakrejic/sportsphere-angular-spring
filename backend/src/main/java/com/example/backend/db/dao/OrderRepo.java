@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.backend.db.DB;
 import com.example.backend.models.EquipmentOrders;
@@ -108,6 +110,66 @@ public class OrderRepo implements OrderRepoInterface {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<Orders> getAllOrdersForWorker() {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT o.id as order_id, o.athlete_id, o.total_price, o.status, o.created_at, " +
+                "eo.id as item_id, eo.equipment_id, eo.quantity, eo.price_at_purchase " +
+                "FROM orders o " +
+                "JOIN equipment_orders eo ON eo.order_id = o.id " +
+                "ORDER BY o.created_at DESC "
+            );
+        ) {
+            Map<Integer, Orders> ordersMap = new LinkedHashMap<>();
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                int orderId = rs.getInt("order_id");
+                Orders o = ordersMap.get(orderId);
+                if (o == null) {
+                    o = new Orders();
+                    o.setId(orderId);
+                    o.setAthleteId(rs.getInt("athlete_id"));
+                    o.setPrice(rs.getDouble("total_price"));
+                    o.setStatus(rs.getString("status"));
+                    o.setCreatedAt(rs.getString("created_at"));
+                    o.setItems(new ArrayList<>());
+                    ordersMap.put(orderId, o);
+                }
+                EquipmentOrders item = new EquipmentOrders();
+                item.setId(rs.getInt("item_id"));
+                item.setOrderId(orderId);
+                item.setEquipmentId(rs.getInt("equipment_id"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setPriceAtPurchase(rs.getDouble("price_at_purchase"));
+                o.getItems().add(item);
+            }
+            return new ArrayList<>(ordersMap.values());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Message updateOrderStatus(int orderId, String status) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE orders SET status = ? WHERE id = ? "
+            );
+        ) {
+            stm.setString(1, status);
+            stm.setInt(2, orderId);
+            int rows = stm.executeUpdate();
+            return rows > 0
+                ? new Message("Order status successfully updated")
+                : new Message(false, "Order not found");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new Message(false, "Error when updating order");
+        }
     }
     
 }

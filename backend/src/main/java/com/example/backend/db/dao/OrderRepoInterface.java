@@ -11,4 +11,7 @@ public interface OrderRepoInterface {
     public Message cancelActiveOrder(int orderId);
 
     public List<Orders> getAllOrders(int userId);
+
+    public List<Orders> getAllOrdersForWorker();
+    public Message updateOrderStatus(int orderId, String status);
 }

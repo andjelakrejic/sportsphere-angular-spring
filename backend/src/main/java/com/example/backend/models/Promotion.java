@@ -3,11 +3,33 @@ package com.example.backend.models;
 public class Promotion {
     private int id;
     private String name;
-    private String facilityName;  // iz JOIN-a
+    private String facilityName;
     private String dateFrom;
     private String dateTo;
     private String discountType;  // PERCENTAGE ili FIXED
     private double discountValue;
+    
+    private int facilityId;
+    private int sportId;
+    private String sportName; 
+
+    public Promotion() {}
+
+
+    // koristi se za getPromotionsByFacility, addPromotion, updatePromotion
+    public Promotion(int id, String name, int facilityId, String facilityName, int sportId, String sportName,
+                      String dateFrom, String dateTo, String discountType, double discountValue) {
+        this.id = id;
+        this.name = name;
+        this.facilityId = facilityId;
+        this.facilityName = facilityName;
+        this.sportId = sportId;
+        this.sportName = sportName;
+        this.dateFrom = dateFrom;
+        this.dateTo = dateTo;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+    }
     
     public Promotion(int id, String name, String facilityName, String dateFrom, String dateTo, String discountType,
             double discountValue) {
@@ -76,6 +98,34 @@ public class Promotion {
         this.discountValue = discountValue;
     }
 
+    public int getFacilityId() {
+        return facilityId;
+    }
+
+
+    public void setFacilityId(int facilityId) {
+        this.facilityId = facilityId;
+    }
+
+
+    public int getSportId() {
+        return sportId;
+    }
+
+
+    public void setSportId(int sportId) {
+        this.sportId = sportId;
+    }
+
+
+    public String getSportName() {
+        return sportName;
+    }
+
+
+    public void setSportName(String sportName) {
+        this.sportName = sportName;
+    }
     
 
 }
