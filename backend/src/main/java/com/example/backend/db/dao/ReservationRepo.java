@@ -15,6 +15,7 @@ import com.example.backend.models.Message;
 import com.example.backend.models.Reservation;
 import com.example.backend.models.helpers.CreateReservationObject;
 import com.example.backend.models.helpers.GetReservationObject;
+import com.example.backend.models.helpers.UpdateTimeObject;
 
 public class ReservationRepo implements ReservationRepoInterface{
 
@@ -135,6 +136,28 @@ public class ReservationRepo implements ReservationRepoInterface{
             e.printStackTrace();
         }
         return reservations;
+    }
+
+    @Override
+    public Message updateReservationTime(UpdateTimeObject obj) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE reservation SET date = ?, time_from = ?, time_to = ? WHERE id = ?"
+            )) {
+            stm.setDate(1, java.sql.Date.valueOf(obj.getDate()));
+            stm.setTime(2, java.sql.Time.valueOf(obj.getStartTime()));
+            stm.setTime(3, java.sql.Time.valueOf(obj.getEndTime()));
+            stm.setInt(4, obj.getId());
+
+            int rows = stm.executeUpdate();
+            return rows > 0
+                ? new Message("Reservation moved successfully!")
+                : new Message(false, "Error moving reservation");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new Message(false, "Error moving reservation");
     }
     
 }

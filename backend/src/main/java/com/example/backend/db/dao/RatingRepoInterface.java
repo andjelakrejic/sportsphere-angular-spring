@@ -13,7 +13,5 @@ public interface RatingRepoInterface {
     public Message addComment(int athleteId, int facilityId, String commentText);
     public List<FacilityReaction> getLast5Comments(int facilityId, int loggedInAthleteId);
     public Map<String, Integer> getSummary(int facilityId);
-    public List<FacilityReaction> getCommentsByAthlete(int athleteId);
-
-    
+    public List<FacilityReaction> getCommentsByAthlete(int athleteId);    
 }

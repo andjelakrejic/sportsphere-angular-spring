@@ -15,6 +15,7 @@ import com.example.backend.models.Message;
 import com.example.backend.models.Reservation;
 import com.example.backend.models.helpers.CreateReservationObject;
 import com.example.backend.models.helpers.GetReservationObject;
+import com.example.backend.models.helpers.UpdateTimeObject;
 
 
 @RestController
@@ -23,7 +24,7 @@ import com.example.backend.models.helpers.GetReservationObject;
 public class ReservationController {
     
     @PostMapping("/createReservation")
-    public Message createReservation(@PathVariable CreateReservationObject obj){
+    public Message createReservation(@RequestBody CreateReservationObject obj){
         return new ReservationRepo().createReservation(obj);    
     }
 
@@ -40,6 +41,11 @@ public class ReservationController {
     @PostMapping("/getReservationsForCourt")
     public List<Reservation> getReservationsForCourt(@RequestBody GetReservationObject obj) {
         return new ReservationRepo().getReservationsForCourt(obj);
+    }
+
+    @PostMapping("/updateReservationTime")
+    public Message updateReservationTime(@RequestBody UpdateTimeObject obj) {
+        return new ReservationRepo().updateReservationTime(obj);
     }
     
 }

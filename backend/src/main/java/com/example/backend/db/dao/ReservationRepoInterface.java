@@ -5,6 +5,7 @@ import com.example.backend.models.Message;
 import com.example.backend.models.Reservation;
 import com.example.backend.models.helpers.CreateReservationObject;
 import com.example.backend.models.helpers.GetReservationObject;
+import com.example.backend.models.helpers.UpdateTimeObject;
 
 public interface ReservationRepoInterface {
 
@@ -14,4 +15,6 @@ public interface ReservationRepoInterface {
     public Message cancelReservation(int resId);
 
     public List<Reservation> getReservationsForCourt(GetReservationObject obj);
+    Message updateReservationTime(UpdateTimeObject obj);
+
 }

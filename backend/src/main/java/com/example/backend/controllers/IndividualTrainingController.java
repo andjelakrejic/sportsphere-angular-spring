@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.db.dao.IndividualTrainingRepo;
 import com.example.backend.models.IndividualTraining;
+import com.example.backend.models.Message;
+import com.example.backend.models.helpers.CourtTrainingViewDTO;
+import com.example.backend.models.helpers.GetReservationObject;
+import com.example.backend.models.helpers.UpdateTimeObject;
 
 @RestController
 @RequestMapping("/individual-trainings")
@@ -32,6 +36,16 @@ public class IndividualTrainingController {
     @GetMapping("/athlete/{athleteId}")
     public List<IndividualTraining> getAthleteTrainings(@PathVariable int athleteId) {
         return new IndividualTrainingRepo().getAthleteTrainings(athleteId);
+    }
+
+    @PostMapping("/getTrainingsForCourt")
+    public List<CourtTrainingViewDTO> getTrainingsForCourt(@RequestBody GetReservationObject obj) {
+        return new IndividualTrainingRepo().getTrainingsForCourt(obj);
+    }
+
+    @PostMapping("/updateTrainingTime")
+    public Message updateTrainingTime(@RequestBody UpdateTimeObject obj) {
+        return new IndividualTrainingRepo().updateTrainingTime(obj);
     }
 
 }
