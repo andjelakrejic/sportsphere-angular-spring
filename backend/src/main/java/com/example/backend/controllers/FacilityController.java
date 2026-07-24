@@ -8,13 +8,18 @@ import com.example.backend.models.Court;
 import com.example.backend.models.Facility;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.helpers.CourtOccupancyDTO;
 import com.example.backend.models.helpers.FacilityUploadDTO;
+import com.example.backend.services.ReportGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -133,4 +138,29 @@ public class FacilityController {
         return new FacilityRepo().updateCourt(court);
     }
     
+    @GetMapping("/reports/occupancy")
+    public ResponseEntity<byte[]> getOccupancyReport(
+            @RequestParam int facilityId,
+            @RequestParam String month
+    ) {
+        try {
+            YearMonth ym = YearMonth.parse(month);
+            LocalDate monthStart = ym.atDay(1);
+            LocalDate monthEnd = ym.atEndOfMonth();
+
+            Facility facility = new FacilityRepo().getFacility(facilityId);
+            List<CourtOccupancyDTO> data = new FacilityRepo().getFacilityOccupancy(facilityId, monthStart, monthEnd);
+
+            byte[] pdf = new ReportGenerator().generateOccupancyReport(facility.getName(), monthStart, monthEnd, data);
+
+            return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=izvestaj-popunjenost.pdf")
+                .body(pdf);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

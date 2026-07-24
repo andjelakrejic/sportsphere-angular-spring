@@ -1,11 +1,13 @@
 package com.example.backend.db.dao;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.example.backend.models.Court;
 import com.example.backend.models.Facility;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.helpers.CourtOccupancyDTO;
 import com.example.backend.models.helpers.FacilityUploadDTO;
 
 public interface FacilityRepoInterface {
@@ -31,4 +33,10 @@ public interface FacilityRepoInterface {
     Message addCourt(Court court);
     Message updateCourt(Court court);
     List<Court> getCourtsByFacilityId(int facilityId);
+
+    /// pdf generator
+    public List<CourtOccupancyDTO> getFacilityOccupancy(int facilityId, LocalDate monthStart, LocalDate monthEnd);
+
+    // admin
+    List<Facility> getPendingFacilities();
 }

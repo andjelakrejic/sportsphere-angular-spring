@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.backend.db.DB;
+import com.example.backend.models.Message;
 import com.example.backend.models.Trainer;
 
 public class TrainerRepo implements TrainerRepoInterface {
@@ -51,5 +52,63 @@ public class TrainerRepo implements TrainerRepoInterface {
         }
 
         return trainers;
+    }
+
+   @Override
+    public List<Trainer> getAllTrainers() {
+        List<Trainer> trainers = new ArrayList<>();
+
+        String sql = "SELECT u.id, u.firstname, u.lastname, u.profile_image, " +
+                    "t.specialization, t.price_per_hour, t.facility_id, f.name, t.status " +
+                    "FROM trainer t " +
+                    "JOIN user u ON t.user_id = u.id " +
+                    "JOIN facility f ON f.id = t.facility_id " +
+                    "ORDER BY t.status ASC, u.firstname ASC";
+
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Trainer trainer = new Trainer(
+                        rs.getInt("id"),
+                        rs.getString("firstname"),
+                        rs.getString("lastname"),
+                        rs.getString("profile_image"),
+                        rs.getString("specialization"),
+                        rs.getDouble("price_per_hour"),
+                        rs.getInt("facility_id"),
+                        rs.getString("name"),
+                        0.0
+                );
+                trainer.setStatus(rs.getString("status"));
+                trainers.add(trainer);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return trainers;
+    }
+
+    @Override
+    public Message deactivateTrainer(int trainerId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE trainer SET status='INACTIVE' WHERE user_id=?"
+            );
+        ) {
+            stm.setInt(1, trainerId);
+
+            int x = stm.executeUpdate();
+            if (x > 0) m.setMessage("Trainer deactivated successfully!");
+            else m.setMessage("Error deactivating trainer...");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 }

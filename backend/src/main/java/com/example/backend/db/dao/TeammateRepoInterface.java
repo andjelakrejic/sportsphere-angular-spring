@@ -25,5 +25,4 @@ public interface TeammateRepoInterface {
     public List<TeammateAd> getMyTeams(int athleteId);
     public List<TeammateRequest> getApprovedPlayers(int adId);
 
-
 }

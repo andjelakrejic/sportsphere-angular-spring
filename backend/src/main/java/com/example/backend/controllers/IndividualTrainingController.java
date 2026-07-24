@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.db.dao.IndividualTrainingRepo;
 import com.example.backend.models.IndividualTraining;
 import com.example.backend.models.Message;
+import com.example.backend.models.helpers.BookTrainingRequest;
 import com.example.backend.models.helpers.CourtTrainingViewDTO;
 import com.example.backend.models.helpers.GetReservationObject;
 import com.example.backend.models.helpers.UpdateTimeObject;
@@ -22,15 +23,10 @@ import com.example.backend.models.helpers.UpdateTimeObject;
 @CrossOrigin(origins = "http://localhost:4200")
 public class IndividualTrainingController {
 
+
     @PostMapping("/bookTraining")
-    public boolean bookTraining(@RequestBody IndividualTraining training) {
-        return new IndividualTrainingRepo().bookTraining(
-                training.getAthleteId(),
-                training.getTrainerId(),
-                training.getFacilityId(),
-                training.getSportId(),
-                training.getScheduledAt()
-        );
+    public Message bookTraining(@RequestBody BookTrainingRequest request) {
+        return new IndividualTrainingRepo().bookTraining(request);
     }
 
     @GetMapping("/athlete/{athleteId}")

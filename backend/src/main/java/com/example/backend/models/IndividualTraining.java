@@ -11,8 +11,11 @@ public class IndividualTraining {
     private String trainingDate;
     private String timeFrom;
     private String timeTo;
+    private String trainerName;
+    private String facilityName;
+    private String sportName;
 
-     public IndividualTraining() {}
+    public IndividualTraining() {}
 
     public IndividualTraining(int id, int athleteId, int trainerId, int facilityId,
                                int sportId, String scheduledAt, String status) {
@@ -105,6 +108,13 @@ public class IndividualTraining {
         this.status = status;
     }
 
-    
+    public String getTrainerName() { return trainerName; }
+    public void setTrainerName(String trainerName) { this.trainerName = trainerName; }
+
+    public String getFacilityName() { return facilityName; }
+    public void setFacilityName(String facilityName) { this.facilityName = facilityName; }
+
+    public String getSportName() { return sportName; }
+    public void setSportName(String sportName) { this.sportName = sportName; }
 
 }

@@ -10,6 +10,7 @@ public class Trainer {
     private int facilityId;
     private String facilityName;
     private double averageRating;
+    private String status; // active ili inactive
 
     public Trainer() {}
 
@@ -97,6 +98,14 @@ public class Trainer {
 
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
+    }
+    
+    public String getStatus() { 
+        return status; 
+    }
+
+    public void setStatus(String status) { 
+        this.status = status; 
     }
 
 }

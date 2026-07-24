@@ -1,6 +1,7 @@
 package com.example.backend.db.dao;
 
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,7 @@ import com.example.backend.db.DB;
 import com.example.backend.models.EquipmentOrders;
 import com.example.backend.models.Message;
 import com.example.backend.models.Orders;
+import com.example.backend.models.helpers.EquipmentTurnoverDTO;
 
 public class OrderRepo implements OrderRepoInterface {
 
@@ -170,6 +172,40 @@ public class OrderRepo implements OrderRepoInterface {
             e.printStackTrace();
             return new Message(false, "Error when updating order");
         }
+    }
+
+    @Override
+    public List<EquipmentTurnoverDTO> getEquipmentTurnover(LocalDate monthStart, LocalDate monthEnd) {
+        List<EquipmentTurnoverDTO> result = new ArrayList<>();
+        String sql =
+            "SELECT e.name AS name, SUM(eo.quantity) AS qty, " +
+            "SUM(eo.price_at_purchase * eo.quantity) AS revenue " +
+            "FROM equipment_orders eo " +
+            "JOIN equipment e ON e.id = eo.equipment_id " +
+            "JOIN orders o ON o.id = eo.order_id " +
+            "WHERE o.status = 'PICKED UP' " +
+            "AND DATE(o.created_at) BETWEEN ? AND ? " +
+            "GROUP BY e.id, e.name " +
+            "ORDER BY revenue DESC";
+
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setDate(1, java.sql.Date.valueOf(monthStart));
+            stm.setDate(2, java.sql.Date.valueOf(monthEnd));
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                result.add(new EquipmentTurnoverDTO(
+                    rs.getString("name"),
+                    rs.getInt("qty"),
+                    rs.getDouble("revenue")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
     
 }

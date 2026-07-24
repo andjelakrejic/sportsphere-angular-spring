@@ -20,4 +20,9 @@ public class TrainerController {
     public List<Trainer> getTrainersByFacilityAndSport(@RequestParam int facilityId, @RequestParam int sportId) {
         return new TrainerRepo().getTrainersByFacilityAndSport(facilityId, sportId);
     }
+
+    @GetMapping("/getAllTrainers")
+    public List<Trainer> getAllTrainers() {
+        return new TrainerRepo().getAllTrainers();
+    }
 }

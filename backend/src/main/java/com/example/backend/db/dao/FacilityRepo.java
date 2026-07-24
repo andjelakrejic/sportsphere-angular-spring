@@ -5,9 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.example.backend.db.DB;
@@ -15,6 +19,7 @@ import com.example.backend.models.Court;
 import com.example.backend.models.Facility;
 import com.example.backend.models.Message;
 import com.example.backend.models.Sport;
+import com.example.backend.models.helpers.CourtOccupancyDTO;
 import com.example.backend.models.helpers.FacilityUploadDTO;
 
 public class FacilityRepo implements FacilityRepoInterface {
@@ -88,24 +93,35 @@ public class FacilityRepo implements FacilityRepoInterface {
         return null;
     }
 
-    // @Override
-    // public int getNumOfLikes(int facilityId) {
-    //     try (Connection conn = DB.source().getConnection();
-    //         PreparedStatement stm = conn.prepareStatement(
-    //             "SELECT COUNT(*) as like_count FROM facility_reaction " +
-    //             "WHERE facility_id = ? AND type = 'LIKE'"
-    //         );
-    //     ) {
-    //         stm.setInt(1, facilityId);
-    //         ResultSet rs = stm.executeQuery();
-    //         if (rs.next()) {
-    //             return rs.getInt("like_count");
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return 0;
-    // }
+    @Override
+    public List<Facility> getPendingFacilities() {
+        List<Facility> facilities = new ArrayList<>();
+        String sql = "SELECT * FROM facility WHERE status = 'PENDING'";
+
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                Facility f = new Facility();
+                f.setId(rs.getInt("id"));
+                f.setName(rs.getString("name"));
+                f.setCity(rs.getString("city"));
+                f.setAddress(rs.getString("address"));
+                f.setDescription(rs.getString("description"));
+                f.setWorkingHoursFrom(rs.getString("working_hours_from"));
+                f.setWorkingHoursTo(rs.getString("working_hours_to"));
+                f.setPricePerHour(rs.getDouble("price_per_hour"));
+                f.setMaxNoShows(rs.getInt("max_no_shows"));
+                f.setStatus(rs.getString("status"));
+                f.setWorkerId(rs.getInt("worker_id"));
+                facilities.add(f);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return facilities;
+    }
     
     @Override
     public List<String> getActiveCities() {
@@ -639,5 +655,83 @@ public class FacilityRepo implements FacilityRepoInterface {
         } catch (SQLException e) {
             return new Message(false, "Database error: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<CourtOccupancyDTO> getFacilityOccupancy(int facilityId, LocalDate monthStart, LocalDate monthEnd) {
+        List<CourtOccupancyDTO> result = new ArrayList<>();
+
+        // working hours objekta
+        String facilitySql = "SELECT working_hours_from, working_hours_to FROM facility WHERE id = ?";
+        // sati po terenu iz rezervacija
+        String reservationSql =
+            "SELECT court_id, SUM(TIME_TO_SEC(TIMEDIFF(time_to, time_from)))/3600.0 AS hours " +
+            "FROM reservation " +
+            "WHERE date BETWEEN ? AND ? AND status != 'CANCELLED' " +
+            "GROUP BY court_id";
+        // sati po terenu iz treninga
+        String trainingSql =
+            "SELECT court_id, SUM(TIME_TO_SEC(TIMEDIFF(time_to, time_from)))/3600.0 AS hours " +
+            "FROM individual_training " +
+            "WHERE training_date BETWEEN ? AND ? AND court_id IS NOT NULL " +
+            "GROUP BY court_id";
+        // svi tereni objekta
+        String courtsSql = "SELECT id, name, type FROM court WHERE facility_id = ?";
+
+        try (Connection conn = DB.source().getConnection()) {
+
+            double hoursPerDay;
+            try (PreparedStatement stm = conn.prepareStatement(facilitySql)) {
+                stm.setInt(1, facilityId);
+                ResultSet rs = stm.executeQuery();
+                if (!rs.next()) return result;
+                LocalTime from = rs.getTime("working_hours_from").toLocalTime();
+                LocalTime to = rs.getTime("working_hours_to").toLocalTime();
+                hoursPerDay = java.time.Duration.between(from, to).toMinutes() / 60.0;
+            }
+
+            long daysInMonth = java.time.temporal.ChronoUnit.DAYS.between(monthStart, monthEnd) + 1;
+            double availableHours = hoursPerDay * daysInMonth;
+
+            Map<Integer, Double> reservationHours = new HashMap<>();
+            try (PreparedStatement stm = conn.prepareStatement(reservationSql)) {
+                stm.setDate(1, java.sql.Date.valueOf(monthStart));
+                stm.setDate(2, java.sql.Date.valueOf(monthEnd));
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    reservationHours.put(rs.getInt("court_id"), rs.getDouble("hours"));
+                }
+            }
+
+            Map<Integer, Double> trainingHours = new HashMap<>();
+            try (PreparedStatement stm = conn.prepareStatement(trainingSql)) {
+                stm.setDate(1, java.sql.Date.valueOf(monthStart));
+                stm.setDate(2, java.sql.Date.valueOf(monthEnd));
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    trainingHours.put(rs.getInt("court_id"), rs.getDouble("hours"));
+                }
+            }
+
+            try (PreparedStatement stm = conn.prepareStatement(courtsSql)) {
+                stm.setInt(1, facilityId);
+                ResultSet rs = stm.executeQuery();
+                while (rs.next()) {
+                    int courtId = rs.getInt("id");
+                    double booked = reservationHours.getOrDefault(courtId, 0.0)
+                                + trainingHours.getOrDefault(courtId, 0.0);
+                    result.add(new CourtOccupancyDTO(
+                        rs.getString("name"),
+                        rs.getString("type"),
+                        booked,
+                        availableHours
+                    ));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }

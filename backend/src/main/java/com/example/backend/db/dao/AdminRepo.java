@@ -21,7 +21,7 @@ public class AdminRepo implements AdminRepoInterface {
     public Admin loginAdmin(Admin a) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
-                "SELECT u.id, u.username, u.password, u.firstname, u.lastname, u.email, u.phone, u.profile_image, " +
+                "SELECT u.id, u.username, u.password, u.firstname, u.lastname, u.email, u.phone, u.profile_image " +
                 "FROM user u " +
                 "JOIN admin a ON u.id = a.user_id " +
                 "WHERE u.username = ? AND u.role = 'ADMIN'");
@@ -54,23 +54,53 @@ public class AdminRepo implements AdminRepoInterface {
     }
 
     @Override
+    public List<User> getPendingRequests() {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT * FROM user WHERE status = 'PENDING' AND role IN ('ATHLETE', 'WORKER')"
+            );
+        ) {
+            List<User> users = new ArrayList<>();
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                users.add(new User(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("firstname"),
+                    rs.getString("lastname"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("profile_image"),
+                    rs.getString("status"),
+                    rs.getString("role")
+                ));
+            }
+            return users;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public Message addSport(Sport s) {
         Message m = new Message("");
-         try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("insert into sport (id, name) values (?,?)");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement("insert into sport (name) values (?)");
         ) {
-            stm.setInt(1, s.getId());
-            stm.setString(2, s.getName());
+            stm.setString(1, s.getName());
 
             int x = stm.executeUpdate();
-            if (x>0) m.setMessage("Sport '" + s.getName() + "' successfully inserted!");
+            if (x > 0) m.setMessage("Sport '" + s.getName() + "' successfully inserted!");
             else m.setMessage("Error inserting sport...");
-            
 
-           } catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-       }
-       return m;
+            m.setMessage("Database error: " + e.getMessage());
+        }
+        return m;
     }
 
     @Override
@@ -94,27 +124,27 @@ public class AdminRepo implements AdminRepoInterface {
 
     @Override
     public Message denyRequest(int userId) {
-         Message m = new Message("");
-         try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("update user set status='DENIED' where status='PENDING' id=?");
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "update user set status='REJECTED' where status='PENDING' and id=?"
+            );
         ) {
             stm.setInt(1, userId);
 
             int x = stm.executeUpdate();
             if (x>0) m.setMessage("Request from user with id: " + userId + " denied");
             else m.setMessage("Error denying request...");
-            
-
-           } catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-       }
-       return m;
+        }
+        return m;
     }
 
     @Override
     public List<User> viewAllAccounts() {
          try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement("select * from user where role !='ADMIN'");
+            PreparedStatement stm = conn.prepareStatement("select * from user where role !='ADMIN' and status = 'APPROVED'");
         ) {
             List<User> users = new ArrayList<>();
 
@@ -144,32 +174,86 @@ public class AdminRepo implements AdminRepoInterface {
     }
 
     @Override
-    public Message acceptFacilityRequest() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'acceptFacilityRequest'");
+    public Message updateUser(User u) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE user SET firstname=?, lastname=?, email=?, phone=? WHERE id=?"
+            );
+        ) {
+            stm.setString(1, u.getFirstname());
+            stm.setString(2, u.getLastname());
+            stm.setString(3, u.getEmail());
+            stm.setString(4, u.getPhone());
+            stm.setInt(5, u.getId());
+
+            int x = stm.executeUpdate();
+            if (x > 0) m.setMessage("User updated successfully!");
+            else m.setMessage("Error updating user...");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 
     @Override
-    public Message changeAthleteAccount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'changeAthleteAccount'");
+    public Message deleteUser(int userId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "DELETE FROM user WHERE id=?"
+            );
+        ) {
+            stm.setInt(1, userId);
+
+            int x = stm.executeUpdate();
+            if (x > 0) m.setMessage("User deleted successfully!");
+            else m.setMessage("Error deleting user...");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 
     @Override
-    public Message changeWorkerAccount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'changeWorkerAccount'");
+    public Message acceptFacilityRequest(int facilityId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE facility SET status='ACTIVE' WHERE status='PENDING' AND id=?"
+            );
+        ) {
+            stm.setInt(1, facilityId);
+
+            int x = stm.executeUpdate();
+            if (x > 0) m.setMessage("Facility with id: " + facilityId + " approved");
+            else m.setMessage("Error approving facility...");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 
     @Override
-    public Message deleteAthleteAccount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteAthleteAccount'");
-    }
+    public Message denyFacilityRequest(int facilityId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "UPDATE facility SET status='INACTIVE' WHERE status='PENDING' AND id=?"
+            );
+        ) {
+            stm.setInt(1, facilityId);
 
-    @Override
-    public Message deleteWorkerAccount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteWorkerAccount'");
+            int x = stm.executeUpdate();
+            if (x > 0) m.setMessage("Facility with id: " + facilityId + " denied");
+            else m.setMessage("Error denying facility...");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 }
