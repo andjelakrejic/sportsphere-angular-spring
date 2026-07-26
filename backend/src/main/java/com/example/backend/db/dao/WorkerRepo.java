@@ -10,6 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +21,12 @@ import com.example.backend.db.DB;
 import com.example.backend.models.Message;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
+import com.example.backend.models.helpers.FacilityWorkerOption;
 
-public class WorkerRepo implements WorkerRepoInterface{
+public class WorkerRepo implements WorkerRepoInterface {
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+        "^(?=[A-Za-z])(?=.{8,12}$)(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z][A-Za-z0-9!@#$%^&*]*$"
+    );
 
     @Override
     public Worker loginWorker(Worker w) {
@@ -29,7 +36,7 @@ public class WorkerRepo implements WorkerRepoInterface{
                 "wk.facility_name, wk.address, wk.registration_number, wk.tax_id " +
                 "FROM user u " +
                 "JOIN worker wk ON u.id = wk.user_id " +
-                "WHERE u.username = ? AND u.role = 'WORKER'"
+                "WHERE u.username = ? AND u.role = 'WORKER' AND u.status = 'APPROVED'"
             )) {
 
             stm.setString(1, w.getUsername());
@@ -64,8 +71,13 @@ public class WorkerRepo implements WorkerRepoInterface{
     
     @Override
     public int registerWorker(Worker w) {
-        try (Connection conn = DB.source().getConnection()) {
+        Connection conn = null;
+        try {
+            conn = DB.source().getConnection();
             conn.setAutoCommit(false);
+            if (!PASSWORD_PATTERN.matcher(w.getPassword()).matches()) {
+                return 0; 
+            }
 
             String userSql = "INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -97,63 +109,89 @@ public class WorkerRepo implements WorkerRepoInterface{
                 conn.rollback();
                 return 0;
             }
-
-            // pronađi ili kreiraj facility ---
+            
             int facilityId;
-            PreparedStatement findFacility = conn.prepareStatement(
-                "SELECT id FROM facility WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) AND LOWER(TRIM(address)) = LOWER(TRIM(?))"
-            );
-            findFacility.setString(1, w.getFacilityName());
-            findFacility.setString(2, w.getAddress());
-            ResultSet facilityRs = findFacility.executeQuery();
 
-            if (facilityRs.next()) {
-                facilityId = facilityRs.getInt("id");
+            if (w.getExistingFacilityId() != null) {
+                // korisnik je izabrao postojeći objekat iz dropdown-a - koristi ID direktno
+                facilityId = w.getExistingFacilityId();
             } else {
-                PreparedStatement createFacility = conn.prepareStatement(
-                    "INSERT INTO facility (name, city, address, description, working_hours_from, working_hours_to, price_per_hour, status) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
+                PreparedStatement findFacility = conn.prepareStatement(
+                    "SELECT id FROM facility WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) AND LOWER(TRIM(address)) = LOWER(TRIM(?))"
                 );
-                createFacility.setString(1, w.getFacilityName());
-                createFacility.setString(2, "");     // TODO: city - forma ga jos ne prikuplja
-                createFacility.setString(3, w.getAddress());
-                createFacility.setString(4, "");
-                createFacility.setString(5, "08:00"); // TODO: default radno vreme
-                createFacility.setString(6, "22:00");
-                createFacility.setDouble(7, 0.0);      // TODO: default cena
-                createFacility.setString(8, "PENDING");
+                findFacility.setString(1, w.getFacilityName());
+                findFacility.setString(2, w.getAddress());
+                ResultSet facilityRs = findFacility.executeQuery();
 
-                int facRows = createFacility.executeUpdate();
-                if (facRows == 0) {
-                    conn.rollback();
-                    return 0;
-                }
-                ResultSet facKeys = createFacility.getGeneratedKeys();
-                if (facKeys.next()) {
-                    facilityId = facKeys.getInt(1);
+                if (facilityRs.next()) {
+                    facilityId = facilityRs.getInt("id");
                 } else {
-                    conn.rollback();
-                    return 0;
+                    PreparedStatement createFacility = conn.prepareStatement(
+                        "INSERT INTO facility (name, city, address, description, working_hours_from, working_hours_to, price_per_hour, status) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS
+                    );
+                    createFacility.setString(1, w.getFacilityName());
+                    createFacility.setString(2, w.getCity());
+                    createFacility.setString(3, w.getAddress());
+                    createFacility.setString(4, "");
+                    createFacility.setString(5, "08:00");
+                    createFacility.setString(6, "22:00");
+                    createFacility.setDouble(7, 0.0);
+                    createFacility.setString(8, "PENDING");
+
+                    int facRows = createFacility.executeUpdate();
+                    if (facRows == 0) {
+                        conn.rollback();
+                        return 0;
+                    }
+                    ResultSet facKeys = createFacility.getGeneratedKeys();
+                    if (facKeys.next()) {
+                        facilityId = facKeys.getInt(1);
+                    } else {
+                        conn.rollback();
+                        return 0;
+                    }
                 }
             }
 
             PreparedStatement stm2 = conn.prepareStatement(
-                "INSERT INTO worker (user_id, facility_name, address, registration_number, tax_id, facility_id) VALUES (?, ?, ?, ?, ?, ?)"
+                "INSERT INTO worker (user_id, facility_name, address, registration_number, tax_id) VALUES (?, ?, ?, ?, ?)"
             );
             stm2.setInt(1, userId);
             stm2.setString(2, w.getFacilityName());
             stm2.setString(3, w.getAddress());
             stm2.setString(4, w.getRegistrationNumber());
             stm2.setString(5, w.getTaxId());
-            stm2.setInt(6, facilityId);
             stm2.executeUpdate();
+
+            PreparedStatement linkStm = conn.prepareStatement(
+                "INSERT INTO worker_facility (worker_id, facility_id) VALUES (?, ?)"
+            );
+            linkStm.setInt(1, userId);
+            linkStm.setInt(2, facilityId);
+            linkStm.executeUpdate();
 
             conn.commit();
             return userId;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
         }
         return 0;
     }
@@ -188,7 +226,7 @@ public class WorkerRepo implements WorkerRepoInterface{
     public Worker getWorker(int userId) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
-                "SELECT u.*, w.facility_name, w.address, w.registration_number, w.tax_id, w.facility_id " +
+                "SELECT u.*, w.facility_name, w.address, w.registration_number, w.tax_id " +
                 "FROM user u JOIN worker w ON u.id = w.user_id WHERE u.id = ?"
             )) {
             stm.setInt(1, userId);
@@ -206,7 +244,6 @@ public class WorkerRepo implements WorkerRepoInterface{
                 w.setAddress(rs.getString("address"));
                 w.setRegistrationNumber(rs.getString("registration_number"));
                 w.setTaxId(rs.getString("tax_id"));
-                w.setFacilityId(rs.getInt("facility_id"));
                 return w;
             }
         } catch (SQLException e) {
@@ -267,13 +304,16 @@ public class WorkerRepo implements WorkerRepoInterface{
     }
 
     @Override
-    public boolean maticniBrojExists(String mb) {
+    public boolean maticniBrojExists(String mb, String facilityName, String address) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
                 "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE w.registration_number = ? AND u.status != 'REJECTED'")
+                "WHERE w.registration_number = ? AND u.status != 'REJECTED' " +
+                "AND NOT (LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)))")
         ) {
             stm.setString(1, mb);
+            stm.setString(2, facilityName);
+            stm.setString(3, address);
             ResultSet rs = stm.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -283,13 +323,16 @@ public class WorkerRepo implements WorkerRepoInterface{
     }
 
     @Override
-    public boolean pibExists(String pib) {
+    public boolean pibExists(String pib, String facilityName, String address) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
                 "SELECT w.user_id FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE w.tax_id = ? AND u.status != 'REJECTED'")
+                "WHERE w.tax_id = ? AND u.status != 'REJECTED' " +
+                "AND NOT (LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)))")
         ) {
             stm.setString(1, pib);
+            stm.setString(2, facilityName);
+            stm.setString(3, address);
             ResultSet rs = stm.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -307,7 +350,7 @@ public class WorkerRepo implements WorkerRepoInterface{
             check.setString(2, obj.getOldPass());
             ResultSet rs = check.executeQuery();
 
-            if (!rs.next()) return new Message("You entered the wrong current password");
+            if (!rs.next()) return new Message(false,"You entered the wrong current password");
 
             try (PreparedStatement upd = conn.prepareStatement(
                     "UPDATE user SET password=? WHERE username=?")) {
@@ -343,6 +386,95 @@ public class WorkerRepo implements WorkerRepoInterface{
             e.printStackTrace();
         }
         return 999; // fail-safe: ako provera pukne, blokiraj registraciju umesto da propusti treći
+    }
+
+    // Poveži worker-a sa objektom (npr. kad se dodaje novi objekat ili kad se worker "prijavi" da radi negde)
+    public Message addWorkerToFacility(int workerId, int facilityId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection()) {
+            PreparedStatement stm = conn.prepareStatement(
+                "insert into worker_facility (worker_id, facility_id) values (?,?)"
+            );
+            stm.setInt(1, workerId);
+            stm.setInt(2, facilityId);
+            stm.executeUpdate();
+            m.setMessage("Worker linked to facility");
+            return m;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        m.setMessage("Error linking worker to facility");
+        return m;
+    }
+
+    // Ukloni vezu (npr. worker prestaje da radi na tom objektu)
+    public Message removeWorkerFromFacility(int workerId, int facilityId) {
+        Message m = new Message("");
+        try (Connection conn = DB.source().getConnection()) {
+            PreparedStatement stm = conn.prepareStatement(
+                "delete from worker_facility where worker_id = ? and facility_id = ?"
+            );
+            stm.setInt(1, workerId);
+            stm.setInt(2, facilityId);
+            stm.executeUpdate();
+            m.setMessage("Worker unlinked from facility");
+            return m;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        m.setMessage("Error unlinking worker from facility");
+        return m;
+    }
+
+    @Override
+    public String[] getExistingFacilityCredentials(String facilityName, String address) {
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT w.registration_number, w.tax_id FROM worker w " +
+                "JOIN user u ON w.user_id = u.id " +
+                "WHERE LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)) " +
+                "AND u.status != 'REJECTED' LIMIT 1")
+        ) {
+            stm.setString(1, facilityName);
+            stm.setString(2, address);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return new String[] { rs.getString("registration_number"), rs.getString("tax_id") };
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // nema postojećeg radnika za taj objekat
+    }
+
+    @Override
+    public List<FacilityWorkerOption> getFacilitiesAvailableForSecondWorker() {
+        List<FacilityWorkerOption> result = new ArrayList<>();
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(
+                "SELECT f.id, f.name, f.city, f.address, w.registration_number, w.tax_id " +
+                "FROM facility f " +
+                "JOIN worker w ON LOWER(TRIM(w.facility_name)) = LOWER(TRIM(f.name)) " +
+                "  AND LOWER(TRIM(w.address)) = LOWER(TRIM(f.address)) " +
+                "JOIN user u ON w.user_id = u.id AND u.status != 'REJECTED' " +
+                "GROUP BY f.id, f.name, f.city, f.address, w.registration_number, w.tax_id " +
+                "HAVING COUNT(*) = 1")
+        ) {
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                FacilityWorkerOption opt = new FacilityWorkerOption();
+                opt.setId(rs.getInt("id"));
+                opt.setName(rs.getString("name"));
+                opt.setCity(rs.getString("city"));
+                opt.setAddress(rs.getString("address"));
+                opt.setRegistrationNumber(rs.getString("registration_number"));
+                opt.setTaxId(rs.getString("tax_id"));
+                result.add(opt);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
     
 }

@@ -136,7 +136,7 @@ public class UserController {
         if (userId > 0) {
             return ResponseEntity.ok(userId);
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message(false,"Registration failed."));
     }
 
     @GetMapping("/getFavoriteSports/{id}")

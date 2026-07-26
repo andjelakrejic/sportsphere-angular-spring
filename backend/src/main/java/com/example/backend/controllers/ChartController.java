@@ -10,6 +10,8 @@ import com.example.backend.db.dao.ChartRepo;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/chart")
@@ -27,12 +29,12 @@ public class ChartController {
     }
 
     @GetMapping("/reservationsPerMonth/{athleteId}")
-    public Map<Integer, Integer> reservationsPerMonth(@PathVariable int athleteId) {
+    public Map<String, Integer> reservationsPerMonth(@PathVariable int athleteId) {
         return new ChartRepo().reservationsPerMonth(athleteId);
     }
 
-    @GetMapping("/getTotalEquipmentSpending")
-    public double getTotalEquipmentSpending() {
-        return new ChartRepo().getTotalEquipmentSpending();
+    @PostMapping("/getTotalEquipmentSpending")
+    public double getTotalEquipmentSpending(@RequestBody int id) {
+        return new ChartRepo().getTotalEquipmentSpending(id);
     }
 }

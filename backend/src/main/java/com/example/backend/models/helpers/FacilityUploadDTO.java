@@ -2,6 +2,8 @@ package com.example.backend.models.helpers;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FacilityUploadDTO {
     private String name;
     private String city;
@@ -90,6 +92,8 @@ public class FacilityUploadDTO {
         private String type;
         private int capacity;
         private String equipmentDescription;
+        
+        @JsonProperty("sportId")
         private int sportId;
         
         // getters i setters

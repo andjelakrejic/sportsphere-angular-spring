@@ -6,17 +6,17 @@ import java.util.List;
 public class Orders {
     private int id;
     private int athleteId;
-    private double price;
+    private double totalPrice;
     private String status; // ORDERED, ACCEPTED, PICKED UP, CANCELED, 
     private String createdAt;
     private List<EquipmentOrders> items;
     
     public Orders() {}
 
-    public Orders(int id, int athleteId, double price, String status, String createdAt) {
+    public Orders(int id, int athleteId, double totalPrice, String status, String createdAt) {
         this.id = id;
         this.athleteId = athleteId;
-        this.price = price;
+        this.totalPrice = totalPrice;
         this.status = status;
         this.createdAt = createdAt;
         this.items = new ArrayList<>();
@@ -38,12 +38,12 @@ public class Orders {
         this.athleteId = athleteId;
     }
 
-    public double getPrice() {
-        return price;
+    public double getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     public String getStatus() {

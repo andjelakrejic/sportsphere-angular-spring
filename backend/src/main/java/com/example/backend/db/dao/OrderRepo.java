@@ -22,7 +22,11 @@ public class OrderRepo implements OrderRepoInterface {
     @Override
     public Message placeOrder(Orders o) {
         Message m = new Message("");
-        try (Connection conn = DB.source().getConnection()) {
+        Connection conn = null;
+
+        try {
+            conn = DB.source().getConnection();
+            conn.setAutoCommit(false); // pocetak transakcije
 
             // 1. Insert u orders
             PreparedStatement stm = conn.prepareStatement(
@@ -30,7 +34,7 @@ public class OrderRepo implements OrderRepoInterface {
                 Statement.RETURN_GENERATED_KEYS
             );
             stm.setInt(1, o.getAthleteId());
-            stm.setDouble(2, o.getPrice());
+            stm.setDouble(2, o.getTotalPrice());
             stm.setString(3, "ORDERED");
             stm.setString(4, java.time.LocalDateTime.now().toString());
             stm.executeUpdate();
@@ -38,12 +42,13 @@ public class OrderRepo implements OrderRepoInterface {
             // 2. Uzmi generisani order ID
             ResultSet keys = stm.getGeneratedKeys();
             if (!keys.next()) {
+                conn.rollback();
                 m.setMessage("Error placing order");
                 return m;
             }
             int orderId = keys.getInt(1);
 
-            // 3. Insert svake stavke u equipment_orders
+            // 3. Insert svake stavke u equipment_orders + smanji stock
             for (EquipmentOrders item : o.getItems()) {
                 PreparedStatement itemStm = conn.prepareStatement(
                     "insert into equipment_orders (order_id, equipment_id, quantity, price_at_purchase) " +
@@ -54,16 +59,49 @@ public class OrderRepo implements OrderRepoInterface {
                 itemStm.setInt(3, item.getQuantity());
                 itemStm.setDouble(4, item.getPriceAtPurchase());
                 itemStm.executeUpdate();
+
+                // Smanji stock_quantity, ali samo ako ima dovoljno na stanju
+                PreparedStatement stockStm = conn.prepareStatement(
+                    "update equipment set stock_quantity = stock_quantity - ? " +
+                    "where id = ? and stock_quantity >= ?"
+                );
+                stockStm.setInt(1, item.getQuantity());
+                stockStm.setInt(2, item.getEquipmentId());
+                stockStm.setInt(3, item.getQuantity());
+                int rows = stockStm.executeUpdate();
+
+                if (rows == 0) {
+                    conn.rollback();
+                    m.setMessage("Not enough stock for equipment id " + item.getEquipmentId());
+                    return m;
+                }
             }
 
+            conn.commit();
             m.setMessage("Order placed");
             return m;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            m.setMessage("Error placing order");
+            return m;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // vrati na default pre nego sto se konekcija vrati u pool
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
         }
-        m.setMessage("Error placing order");
-        return m;
     }
 
     @Override
@@ -134,7 +172,7 @@ public class OrderRepo implements OrderRepoInterface {
                     o = new Orders();
                     o.setId(orderId);
                     o.setAthleteId(rs.getInt("athlete_id"));
-                    o.setPrice(rs.getDouble("total_price"));
+                    o.setTotalPrice(rs.getDouble("total_price"));
                     o.setStatus(rs.getString("status"));
                     o.setCreatedAt(rs.getString("created_at"));
                     o.setItems(new ArrayList<>());

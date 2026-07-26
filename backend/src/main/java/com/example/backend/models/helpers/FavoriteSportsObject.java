@@ -5,6 +5,8 @@ import java.util.List;
 public class FavoriteSportsObject {
     private int athleteId;
     private List<Integer> sportIds;
+
+    public FavoriteSportsObject() {}
     
 
     public int getAthleteId() { return athleteId; }

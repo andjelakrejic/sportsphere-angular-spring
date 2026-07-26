@@ -114,7 +114,6 @@ public class FacilityRepo implements FacilityRepoInterface {
                 f.setPricePerHour(rs.getDouble("price_per_hour"));
                 f.setMaxNoShows(rs.getInt("max_no_shows"));
                 f.setStatus(rs.getString("status"));
-                f.setWorkerId(rs.getInt("worker_id"));
                 facilities.add(f);
             }
         } catch (SQLException e) {
@@ -193,7 +192,7 @@ public class FacilityRepo implements FacilityRepoInterface {
             PreparedStatement stm = conn.prepareStatement(
                 "SELECT s.id as id, s.name as name " +
                 "FROM sport s JOIN facility_sport fs ON fs.sport_id = s.id " +
-                "WHERE fs.sport_id = ? " 
+                "WHERE fs.facility_id = ? " 
             );
         ) {
             stm.setInt(1, id);
@@ -407,13 +406,16 @@ public class FacilityRepo implements FacilityRepoInterface {
 
    @Override
     public Message addFacility(FacilityUploadDTO dto, int workerId) {
-        String sql = "INSERT INTO facility (name, city, address, description, " +
-                     "working_hours_from, working_hours_to, price_per_hour, max_no_shows, status, worker_id) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)";
+        Connection conn = null;
+        try {
+            conn = DB.source().getConnection();
+            conn.setAutoCommit(false); // pocetak transakcije
 
-        try (Connection conn = DB.source().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            String sql = "INSERT INTO facility (name, city, address, description, " +
+                        "working_hours_from, working_hours_to, price_per_hour, max_no_shows, status) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')";
 
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, dto.getName());
             ps.setString(2, dto.getCity());
             ps.setString(3, dto.getAddress());
@@ -422,30 +424,41 @@ public class FacilityRepo implements FacilityRepoInterface {
             ps.setString(6, dto.getWorkingHoursTo());
             ps.setDouble(7, dto.getPricePerHour());
             ps.setInt(8, dto.getMaxNoShows());
-            ps.setInt(9, workerId);
 
             int rows = ps.executeUpdate();
             if (rows == 0) {
+                conn.rollback();
                 return new Message(false, "Failed to create facility.");
             }
 
             int facilityId;
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (!keys.next()) {
+                    conn.rollback();
                     return new Message(false, "Failed to retrieve new facility id.");
                 }
                 facilityId = keys.getInt(1);
             }
 
-            // ako je poslata i lista terena, validiraj i ubaci
+            // 1. Poveži worker-a sa novim objektom preko worker_facility tabele
+            PreparedStatement linkStm = conn.prepareStatement(
+                "insert into worker_facility (worker_id, facility_id) values (?, ?)"
+            );
+            linkStm.setInt(1, workerId);
+            linkStm.setInt(2, facilityId);
+            linkStm.executeUpdate();
+
+            // 2. Ako je poslata i lista terena, validiraj i ubaci
             if (dto.getCourts() != null && !dto.getCourts().isEmpty()) {
                 Message courtsValidation = validateCourtNamesUnique(dto.getCourts());
                 if (!courtsValidation.isSuccess()) {
+                    conn.rollback();
                     return courtsValidation;
                 }
 
                 for (FacilityUploadDTO.CourtDTO c : dto.getCourts()) {
                     if (c.getEquipmentDescription() != null && c.getEquipmentDescription().length() > 300) {
+                        conn.rollback();
                         return new Message(false,
                             "Equipment description for court '" + c.getName() + "' exceeds 300 characters.");
                     }
@@ -458,60 +471,94 @@ public class FacilityRepo implements FacilityRepoInterface {
                     court.setEquipmentDescription(c.getEquipmentDescription());
                     court.setSportId(c.getSportId());
 
-                    Message courtResult = addCourt(court);
+                    // Koristi istu konekciju kako bi sve bilo u istoj transakciji
+                    // addCourt sada i sam upisuje vezu u facility_sport
+                    Message courtResult = addCourt(conn, court);
                     if (!courtResult.isSuccess()) {
+                        conn.rollback();
                         return courtResult;
                     }
                 }
             }
 
+            conn.commit();
             return new Message(true, "Facility submitted for approval.");
 
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
             return new Message(false, "Database error: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
         }
     }
 
     @Override
     public Message addCourt(Court court) {
+        try (Connection conn = DB.source().getConnection()) {
+            return addCourt(conn, court);
+        } catch (SQLException e) {
+            return new Message(false, "Database error: " + e.getMessage());
+        }
+    }
+
+    // Ova metoda deli konekciju i transakciju sa addFacility metodom
+    public Message addCourt(Connection conn, Court court) throws SQLException {
         if (court.getEquipmentDescription() != null && court.getEquipmentDescription().length() > 300) {
             return new Message(false, "Equipment description exceeds 300 characters.");
         }
 
-        String checkSql = "SELECT COUNT(*) FROM court WHERE facility_id = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?)) ";
+        String checkSql = "SELECT COUNT(*) FROM court WHERE facility_id = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?))";
         String insertSql = "INSERT INTO court (facility_id, name, type, capacity, equipment_description, sport_id) " +
-                            "VALUES (?, ?, ?, ?, ?, ?)";
+                        "VALUES (?, ?, ?, ?, ?, ?)";
+        String linkSql = "INSERT INTO facility_sport (facility_id, sport_id) VALUES (?, ?) " +
+                        "ON DUPLICATE KEY UPDATE facility_id = facility_id";
 
-        try (Connection conn = DB.source().getConnection()) {
-
-            try (PreparedStatement check = conn.prepareStatement(checkSql)) {
-                check.setInt(1, court.getFacilityId());
-                check.setString(2, court.getName());
-                try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        return new Message(false,
-                            "A court/hall with name '" + court.getName() + "' already exists in this facility.");
-                    }
+        try (PreparedStatement check = conn.prepareStatement(checkSql)) {
+            check.setInt(1, court.getFacilityId());
+            check.setString(2, court.getName());
+            try (ResultSet rs = check.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return new Message(false,
+                        "A court/hall with name '" + court.getName() + "' already exists in this facility.");
                 }
             }
-
-            try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
-                insert.setInt(1, court.getFacilityId());
-                insert.setString(2, court.getName());
-                insert.setString(3, court.getType());
-                insert.setInt(4, court.getCapacity());
-                insert.setString(5, court.getEquipmentDescription());
-                insert.setInt(6, court.getSportId());
-
-                int rows = insert.executeUpdate();
-                return rows > 0
-                    ? new Message(true, "Court added successfully.")
-                    : new Message(false, "Failed to add court.");
-            }
-
-        } catch (SQLException e) {
-            return new Message(false, "Database error: " + e.getMessage());
         }
+
+        try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+            insert.setInt(1, court.getFacilityId());
+            insert.setString(2, court.getName());
+            insert.setString(3, court.getType());
+            insert.setInt(4, court.getCapacity());
+            insert.setString(5, court.getEquipmentDescription());
+            insert.setInt(6, court.getSportId());
+
+            int rows = insert.executeUpdate();
+            if (rows == 0) {
+                return new Message(false, "Failed to add court.");
+            }
+        }
+
+        // Poveži facility sa sportom ovog terena (upsert, bez duplikata zahvaljujući composite PK)
+        try (PreparedStatement link = conn.prepareStatement(linkSql)) {
+            link.setInt(1, court.getFacilityId());
+            link.setInt(2, court.getSportId());
+            link.executeUpdate();
+        }
+
+        return new Message(true, "Court added successfully.");
     }
 
     // provera unikatnosti naziva unutar liste koja se salje odjednom (JSON upload)
@@ -560,10 +607,12 @@ public class FacilityRepo implements FacilityRepoInterface {
     @Override
     public List<Facility> getFacilitiesByWorkerId(int workerId) {
         List<Facility> facilities = new ArrayList<>();
-        String sql = "SELECT * FROM facility WHERE worker_id = ? ";
+        String sql = "SELECT f.* FROM facility f " +
+                    "JOIN worker_facility wf ON f.id = wf.facility_id " +
+                    "WHERE wf.worker_id = ?";
 
         try (Connection conn = DB.source().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, workerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -578,7 +627,6 @@ public class FacilityRepo implements FacilityRepoInterface {
                     f.setPricePerHour(rs.getDouble("price_per_hour"));
                     f.setMaxNoShows(rs.getInt("max_no_shows"));
                     f.setStatus(rs.getString("status"));
-                    f.setWorkerId(rs.getInt("worker_id"));
                     facilities.add(f);
                 }
             }
@@ -617,7 +665,6 @@ public class FacilityRepo implements FacilityRepoInterface {
 
     @Override
     public Message updateCourt(Court court) {
-        // isti princip kao addCourt, samo WHERE id = ? i AND id != ? u check upitu
         String checkSql = "SELECT COUNT(*) FROM court WHERE facility_id = ? AND LOWER(TRIM(name)) = LOWER(TRIM(?)) AND id != ? ";
         String updateSql = "UPDATE court SET name = ?, type = ?, capacity = ?, equipment_description = ?, sport_id = ? WHERE id = ?";
 

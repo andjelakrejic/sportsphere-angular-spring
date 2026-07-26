@@ -30,6 +30,7 @@ import com.example.backend.models.Facility;
 import com.example.backend.models.Message;
 import com.example.backend.models.Worker;
 import com.example.backend.models.helpers.ChangePasswordObject;
+import com.example.backend.models.helpers.FacilityWorkerOption;
 
 
 @RestController
@@ -71,27 +72,37 @@ public class WorkerController {
             @RequestParam String phone,
             @RequestParam String nameOfPlace,
             @RequestParam String address,
+            @RequestParam String city,
             @RequestParam String mb,
             @RequestParam String pib,
+            @RequestParam(required = false) Integer existingFacilityId,
             @RequestParam(required = false) MultipartFile image
     ) {
         WorkerRepo repo = new WorkerRepo();
 
         if (repo.usernameExists(username)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Username already taken."));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message(false,"Username already taken."));
         }
         if (repo.emailExists(email)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Email already registered."));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message(false,"Email already registered."));
         }
-        if (repo.maticniBrojExists(mb)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Registration number already in use."));
+        String[] existingCredentials = repo.getExistingFacilityCredentials(nameOfPlace, address);
+        if (existingCredentials != null) {
+            if (!existingCredentials[0].equals(mb) || !existingCredentials[1].equals(pib)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new Message(false,"Registration number and Tax ID must match the existing employee's data for this facility."));
+            }
         }
-        if (repo.pibExists(pib)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("Tax ID already in use."));
+        if (repo.maticniBrojExists(mb, nameOfPlace, address)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message(false,"Registration number already in use."));
         }
+        if (repo.pibExists(pib, nameOfPlace, address)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message(false,"Tax ID already in use."));
+        }
+
         if (repo.countWorkersAtFacility(nameOfPlace, address) >= 2) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new Message("This facility already has the maximum number of registered employees (2)."));
+                .body(new Message(false,"This facility already has the maximum number of registered employees (2)."));
         }
 
         Worker w = new Worker();
@@ -103,6 +114,7 @@ public class WorkerController {
         w.setPhone(phone);
         w.setFacilityName(nameOfPlace);
         w.setAddress(address);
+        w.setCity(city);
         w.setRegistrationNumber(mb);
         w.setTaxId(pib);
 
@@ -121,7 +133,7 @@ public class WorkerController {
         if (userId > 0) {
             return ResponseEntity.ok(userId);
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message("Registration failed."));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Message(false,"Registration failed."));
     }
 
     @PostMapping("/uploadProfileImage")
@@ -130,45 +142,54 @@ public class WorkerController {
         return new UserRepo().uploadProfileImage(username, image);
     }
     
-    @GetMapping("/getMyFacility/{workerId}")
-    public ResponseEntity<?> getMyFacility(@PathVariable int workerId) {
-        WorkerRepo workerRepo = new WorkerRepo();
+    @GetMapping("/getMyFacilities/{workerId}")
+    public ResponseEntity<?> getMyFacilities(@PathVariable int workerId) {
         FacilityRepo facilityRepo = new FacilityRepo();
         CourtRepo courtRepo = new CourtRepo();
 
-        Worker worker = workerRepo.getWorker(workerId);
-        if (worker == null || worker.getFacilityId() == null) {
-            return ResponseEntity.status(404).body("Facility not found for this worker");
+        List<Facility> facilities = facilityRepo.getFacilitiesByWorkerId(workerId);
+        if (facilities.isEmpty()) {
+            return ResponseEntity.status(404).body("No facilities found for this worker");
         }
 
-        Facility facility = facilityRepo.getFacility(worker.getFacilityId());
-        List<Court> courts = courtRepo.getCourtsForFacility(worker.getFacilityId());
+        List<Map<String, Object>> result = new ArrayList<>();
 
-        List<Court> openCourts = new ArrayList<>();
-        List<Court> closedCourts = new ArrayList<>();
-        List<Court> halls = new ArrayList<>();
+        for (Facility facility : facilities) {
+            List<Court> courts = courtRepo.getCourtsForFacility(facility.getId());
 
-        for (Court c : courts) {
-            switch (c.getType()) {
-                case "OPEN" -> openCourts.add(c);
-                case "CLOSED" -> closedCourts.add(c);
-                case "HALL" -> halls.add(c);
+            List<Court> openCourts = new ArrayList<>();
+            List<Court> closedCourts = new ArrayList<>();
+            List<Court> halls = new ArrayList<>();
+
+            for (Court c : courts) {
+                switch (c.getType()) {
+                    case "OPEN" -> openCourts.add(c);
+                    case "CLOSED" -> closedCourts.add(c);
+                    case "HALL" -> halls.add(c);
+                }
             }
+
+            boolean hasValidOpenCourt = openCourts.stream().anyMatch(c -> c.getCapacity() >= 4);
+            boolean closedNamesUnique = closedCourts.stream().map(Court::getName).distinct().count() == closedCourts.size();
+            boolean hallNamesUnique = halls.stream().map(Court::getName).distinct().count() == halls.size();
+
+            Map<String, Object> facilityData = new HashMap<>();
+            facilityData.put("facility", facility);
+            facilityData.put("openCourts", openCourts);
+            facilityData.put("closedCourts", closedCourts);
+            facilityData.put("halls", halls);
+            facilityData.put("hasValidOpenCourt", hasValidOpenCourt);
+            facilityData.put("closedNamesUnique", closedNamesUnique);
+            facilityData.put("hallNamesUnique", hallNamesUnique);
+
+            result.add(facilityData);
         }
 
-        boolean hasValidOpenCourt = openCourts.stream().anyMatch(c -> c.getCapacity() >= 4);
-        boolean closedNamesUnique = closedCourts.stream().map(Court::getName).distinct().count() == closedCourts.size();
-        boolean hallNamesUnique = halls.stream().map(Court::getName).distinct().count() == halls.size();
+        return ResponseEntity.ok(result);
+    }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("facility", facility);
-        response.put("openCourts", openCourts);
-        response.put("closedCourts", closedCourts);
-        response.put("halls", halls);
-        response.put("hasValidOpenCourt", hasValidOpenCourt);
-        response.put("closedNamesUnique", closedNamesUnique);
-        response.put("hallNamesUnique", hallNamesUnique);
-
-        return ResponseEntity.ok(response);
+    @GetMapping("/getFacilitiesAvailableForSecondWorker")
+    public List<FacilityWorkerOption> getFacilitiesAvailableForSecondWorker() {
+        return new WorkerRepo().getFacilitiesAvailableForSecondWorker();
     }
 }

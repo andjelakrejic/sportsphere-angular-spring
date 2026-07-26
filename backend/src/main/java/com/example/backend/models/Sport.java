@@ -9,6 +9,8 @@ public class Sport {
         this.name = name;
     }
 
+    public Sport() {}
+
     public int getId() {
         return id;
     }

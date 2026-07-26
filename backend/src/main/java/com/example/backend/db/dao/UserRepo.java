@@ -3,6 +3,7 @@ package com.example.backend.db.dao;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,9 @@ import com.example.backend.models.helpers.ChangePasswordObject;
 import com.example.backend.models.helpers.FavoriteSportsObject;
 
 public class UserRepo implements UserRepoInterface {
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+        "^(?=[A-Za-z])(?=.{8,12}$)(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z][A-Za-z0-9!@#$%^&*]*$"
+    );
     
     @Override
     public Athlete loginAthlete(Athlete a) {    
@@ -32,7 +36,7 @@ public class UserRepo implements UserRepoInterface {
              "SELECT u.id, u.username, u.password, u.firstname, u.lastname, u.email, u.phone, u.profile_image " +
             "FROM user u " +
             "JOIN athlete at ON u.id = at.user_id " +
-            "WHERE u.username = ? AND u.role = 'ATHLETE'"
+            "WHERE u.username = ? AND u.role = 'ATHLETE' AND u.status = 'APPROVED'"
          )) {
 
         stm.setString(1, a.getUsername());
@@ -193,21 +197,30 @@ public class UserRepo implements UserRepoInterface {
         }
     }
 
-    // 3. Promena lozinke — odvojeno jer zahteva proveru stare
+    @Override
     public Message changePassword(ChangePasswordObject obj) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement check = conn.prepareStatement(
-                "SELECT 1 FROM user WHERE username=? AND password=?")) {
-            
+                "SELECT password FROM user WHERE username=?")) {
+
             check.setString(1, obj.getUsername());
-            check.setString(2, obj.getOldPass());
             ResultSet rs = check.executeQuery();
 
-            if (!rs.next()) return new Message("You entered the wrong current password");
+            if (!rs.next()) {
+                return new Message(false, "User not found");
+            }
+
+            String storedHash = rs.getString("password");
+
+            if (!BCrypt.checkpw(obj.getOldPass(), storedHash)) {
+                return new Message(false, "You entered the wrong current password");
+            }
+
+            String newHash = BCrypt.hashpw(obj.getNewPass(), BCrypt.gensalt());
 
             try (PreparedStatement upd = conn.prepareStatement(
                     "UPDATE user SET password=? WHERE username=?")) {
-                upd.setString(1, obj.getNewPass());
+                upd.setString(1, newHash);
                 upd.setString(2, obj.getUsername());
                 upd.executeUpdate();
             }
@@ -216,7 +229,7 @@ public class UserRepo implements UserRepoInterface {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return new Message(false, "Something went wrong");
         }
     }
 
@@ -226,6 +239,9 @@ public class UserRepo implements UserRepoInterface {
     public int registerAthlete(Athlete a) {
         try (Connection conn = DB.source().getConnection()) {
             conn.setAutoCommit(false); // transakcija - oba inserta ili nijedan
+            if (!PASSWORD_PATTERN.matcher(a.getPassword()).matches()) {
+                return 0; 
+            }
 
             // 1. insert u user tabelu
             String userSql = "INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role) " +

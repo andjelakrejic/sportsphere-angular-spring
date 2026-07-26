@@ -24,7 +24,7 @@ public class ReservationRepo implements ReservationRepoInterface{
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
                 "INSERT INTO reservation (court_id, athlete_id, sport_id, date, time_from, time_to, status) " +
-                "VALUES (?, ?, ?, ?, ?, ?, 'PENDING')"
+                "VALUES (?, ?, ?, ?, ?, ?, 'BOOKED')"
             );
         ) {
             stm.setInt(1, obj.getCourtId());
@@ -37,12 +37,12 @@ public class ReservationRepo implements ReservationRepoInterface{
             int rows = stm.executeUpdate();
             return rows > 0 
                 ? new Message("Reservation successfully created!") 
-                : new Message("Error creating reservation");
+                : new Message(false, "Error creating reservation");
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Message("Error creating reservation");
+        return new Message(false, "Error creating reservation");
     }
 
     @Override
@@ -97,12 +97,12 @@ public class ReservationRepo implements ReservationRepoInterface{
             int rows = stm.executeUpdate();
             return rows > 0 
                 ? new Message("Reservation successfully deleted!") 
-                : new Message("Error deleting reservation");
+                : new Message(false,"Error deleting reservation");
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Message("Error deleting reservation");
+        return new Message(false,"Error deleting reservation");
     }
 
     @Override

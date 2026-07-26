@@ -197,24 +197,75 @@ public class AdminRepo implements AdminRepoInterface {
         return m;
     }
 
-    @Override
+   @Override
     public Message deleteUser(int userId) {
-        Message m = new Message("");
-        try (Connection conn = DB.source().getConnection();
-            PreparedStatement stm = conn.prepareStatement(
-                "DELETE FROM user WHERE id=?"
-            );
-        ) {
-            stm.setInt(1, userId);
+        try (Connection conn = DB.source().getConnection()) {
+            conn.setAutoCommit(false);
+            
+            try {
+                // Proveri koji je role
+                String role = null;
+                try (PreparedStatement stm = conn.prepareStatement(
+                    "SELECT role FROM user WHERE id=?")) {
+                    stm.setInt(1, userId);
+                    ResultSet rs = stm.executeQuery();
+                    if (rs.next()) role = rs.getString("role");
+                }
 
-            int x = stm.executeUpdate();
-            if (x > 0) m.setMessage("User deleted successfully!");
-            else m.setMessage("Error deleting user...");
+                if ("WORKER".equals(role)) {
+                    // Obrisi iz worker_facility
+                    try (PreparedStatement stm = conn.prepareStatement(
+                        "DELETE FROM worker_facility WHERE worker_id=?")) {
+                        stm.setInt(1, userId);
+                        stm.executeUpdate();
+                    }
+                    // Obrisi iz worker
+                    try (PreparedStatement stm = conn.prepareStatement(
+                        "DELETE FROM worker WHERE user_id=?")) {
+                        stm.setInt(1, userId);
+                        stm.executeUpdate();
+                    }
+                } else if ("ATHLETE".equals(role)) {
+                    // Obrisi iz athlete_facility_block
+                    try (PreparedStatement stm = conn.prepareStatement(
+                        "DELETE FROM athlete_facility_block WHERE athlete_id=?")) {
+                        stm.setInt(1, userId);
+                        stm.executeUpdate();
+                    }
+                    // Obrisi iz athlete_sport
+                    try (PreparedStatement stm = conn.prepareStatement(
+                        "DELETE FROM athlete_sport WHERE athlete_id=?")) {
+                        stm.setInt(1, userId);
+                        stm.executeUpdate();
+                    }
+                    // Obrisi iz athlete
+                    try (PreparedStatement stm = conn.prepareStatement(
+                        "DELETE FROM athlete WHERE user_id=?")) {
+                        stm.setInt(1, userId);
+                        stm.executeUpdate();
+                    }
+                }
+
+                // Na kraju obrisi iz user
+                try (PreparedStatement stm = conn.prepareStatement(
+                    "DELETE FROM user WHERE id=?")) {
+                    stm.setInt(1, userId);
+                    stm.executeUpdate();
+                }
+
+                conn.commit();
+                return new Message("User deleted successfully!");
+
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+                return new Message(false, "Error deleting user.");
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return new Message(false, "Error deleting user.");
         }
-        return m;
     }
 
     @Override

@@ -7,6 +7,7 @@ public class TeammateRequest {
     private int athleteId;
     private String status;
     private String createdAt;
+    private String athleteUsername;
     
     public TeammateRequest() {}
 
@@ -55,6 +56,14 @@ public class TeammateRequest {
     }
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAthleteUsername() {
+        return athleteUsername;
+    }
+
+    public void setAthleteUsername(String athleteUsername) {
+        this.athleteUsername = athleteUsername;
     }
 
     

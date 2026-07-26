@@ -5,15 +5,8 @@ public class Worker extends User{
     private String address;
     private String registrationNumber;
     private String taxId;
-     private Integer facilityId;
-
-    public Integer getFacilityId() {
-        return facilityId;
-    }
-
-     public void setFacilityId(Integer facilityId) {
-         this.facilityId = facilityId;
-     }
+    private String city;
+    private Integer existingFacilityId;
 
     public Worker() {}
 
@@ -26,6 +19,18 @@ public class Worker extends User{
         this.address = address;
         this.registrationNumber = registrationNumber;
         this.taxId = taxId;
+    }
+
+    public Worker(int id, String username, String password, String firstname, String lastname, 
+                  String email, String phone, String profileImage,
+                  String facilityName, String address, String registrationNumber, String taxId, String city) {
+        
+        super(id, username, password, firstname, lastname, email, phone, profileImage, "APPROVED", "WORKER");
+        this.facilityName = facilityName;
+        this.address = address;
+        this.registrationNumber = registrationNumber;
+        this.taxId = taxId;
+        this.city = city;
     }
 
     public String getFacilityName() {
@@ -58,6 +63,22 @@ public class Worker extends User{
 
     public void setTaxId(String taxId) {
         this.taxId = taxId;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+     public Integer getExistingFacilityId() {
+        return existingFacilityId;
+    }
+
+    public void setExistingFacilityId(Integer existingFacilityId) {
+        this.existingFacilityId = existingFacilityId;
     }
 
     

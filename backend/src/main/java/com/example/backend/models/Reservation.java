@@ -23,6 +23,7 @@ public class Reservation {
         this.timeTo = timeTo;
         this.status = status;
     }
+    public Reservation() {}
 
     public int getId() {
         return id;

@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 
 
 @RestController
@@ -104,12 +107,27 @@ public class FacilityController {
 
     @PostMapping(value = "/uploadFacilityJson", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Message uploadFacilityJson(@RequestParam("file") MultipartFile file, @RequestParam int workerId) {
+        if (file.isEmpty()) {
+            return new Message(false, "Uploaded file is empty. Please select a valid JSON file.");
+        }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            
+            // Parse JSON file into DTO
             FacilityUploadDTO dto = objectMapper.readValue(file.getInputStream(), FacilityUploadDTO.class);
+            
+            if (dto == null) {
+                return new Message(false, "JSON file does not contain valid facility data.");
+            }
+
+            // Call database transaction for facility, worker_facility, court, and facility_sport
             return new FacilityRepo().addFacility(dto, workerId);
+
+        } catch (JsonParseException | JsonMappingException e) {
+            // Catch JSON syntax errors (missing quotes, brackets, bad formatting, etc.)
+            return new Message(false, "Invalid JSON format: " + e.getOriginalMessage());
         } catch (IOException e) {
-            return new Message(false, "Invalid JSON file: " + e.getMessage());
+            return new Message(false, "Failed to read JSON file: " + e.getMessage());
         }
     }
 

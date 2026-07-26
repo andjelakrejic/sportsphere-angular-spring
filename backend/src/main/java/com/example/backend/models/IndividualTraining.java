@@ -7,7 +7,7 @@ public class IndividualTraining {
     private int facilityId;
     private int sportId;
     private String scheduledAt;
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
+    private String status; // BOOKED, COMPLETED, NO_SHOW
     private String trainingDate;
     private String timeFrom;
     private String timeTo;

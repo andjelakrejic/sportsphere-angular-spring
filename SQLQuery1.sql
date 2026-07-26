@@ -1,3 +1,83 @@
+ALTER TABLE individual_training 
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'PENDING';
+
+UPDATE reservation SET date = CURDATE(), time_from = SUBTIME(CURTIME(), '00:03:00') WHERE id = 6;
+
+-- reservation tabela
+ALTER TABLE reservation 
+  MODIFY COLUMN status ENUM('PENDING','BOOKED','CONFIRMED','NO_SHOW','CANCELLED') NOT NULL;
+
+UPDATE reservation SET status = 'BOOKED' WHERE status = 'PENDING';
+
+ALTER TABLE reservation 
+  MODIFY COLUMN status ENUM('BOOKED','CONFIRMED','NO_SHOW','CANCELLED') NOT NULL;
+
+INSERT INTO user (username, password, firstname, lastname, email, phone, profile_image, status, role, created_at)
+VALUES (
+  'admin',
+  '$2a$10$AR9Cz8q3O4O/rkmvKjYUQeYvZhir87nBjZ7AcEDUyL6mH20zA.1MS',
+  'Admin',
+  'Admin',
+  'admin@sportsphere.com',
+  '+381600000000',
+  'default-avatar.png',
+  'APPROVED',
+  'ADMIN',
+  NOW()
+);
+ALTER TABLE user AUTO_INCREMENT = 14;
+-- 1. Kreiraj novu tabelu
+CREATE TABLE worker_facility (
+    worker_id INT NOT NULL,
+    facility_id INT NOT NULL,
+    PRIMARY KEY (worker_id, facility_id),
+    FOREIGN KEY (worker_id) REFERENCES worker(user_id),
+    FOREIGN KEY (facility_id) REFERENCES facility(id)
+);
+
+-- 2. Prebaci postojece podatke (koristeci facility.worker_id koji jos postoji)
+INSERT INTO worker_facility (worker_id, facility_id)
+SELECT worker_id, id FROM facility WHERE worker_id IS NOT NULL;
+
+-- 3. Tek sad obrisi stare kolone
+ALTER TABLE facility DROP COLUMN worker_id;
+ALTER TABLE worker DROP COLUMN facility_id;
+
+ALTER TABLE trainer 
+  ADD COLUMN status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE';
+
+INSERT INTO admin (user_id)
+VALUES (LAST_INSERT_ID());
+
+ALTER TABLE individual_training 
+ADD COLUMN training_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+ADD COLUMN time_from TIME NOT NULL DEFAULT '00:00:00',
+ADD COLUMN time_to TIME NOT NULL DEFAULT '00:00:00';
+
+ALTER TABLE individual_training 
+  ADD COLUMN court_id INT NULL,
+  ADD CONSTRAINT fk_training_court FOREIGN KEY (court_id) REFERENCES court(id);
+
+CREATE TABLE athlete_facility_block (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    athlete_id INT NOT NULL,
+    facility_id INT NOT NULL,
+    no_show_count INT NOT NULL DEFAULT 0,
+    blocked BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE KEY uq_athlete_facility (athlete_id, facility_id),
+    CONSTRAINT fk_afb_athlete FOREIGN KEY (athlete_id) REFERENCES athlete(id),
+    CONSTRAINT fk_afb_facility FOREIGN KEY (facility_id) REFERENCES facility(id)
+);
+
+ALTER TABLE worker
+ADD COLUMN facility_id INT NULL,
+ADD CONSTRAINT fk_worker_facility
+    FOREIGN KEY (facility_id) REFERENCES facility(id);
+    
+ALTER TABLE court
+ADD COLUMN sport_id INT NULL,
+ADD CONSTRAINT fk_court_sport FOREIGN KEY (sport_id) REFERENCES sport(id);
+    
 SELECT id, scheduled_at, NOW() FROM individual_training;
 
 SELECT id, scheduled_at, 

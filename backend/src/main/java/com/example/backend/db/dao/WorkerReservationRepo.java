@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.example.backend.db.DB;
 import com.example.backend.models.Message;
+import com.example.backend.models.helpers.AthleteBlockStatusDTO;
 import com.example.backend.models.helpers.WorkerReservationDTO;
 import com.example.backend.models.helpers.WorkerTrainingDTO;
 
@@ -16,6 +17,8 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
 
     @Override
     public List<WorkerReservationDTO> getReservationsForFacility(int facilityId) {
+        expireOverdueReservations(facilityId);
+
         List<WorkerReservationDTO> list = new ArrayList<>();
         String sql = "SELECT r.id, c.name as court_name, u.username as athlete_username, " +
                 "s.name as sport_name, r.date, r.time_from, r.time_to, r.status " +
@@ -51,6 +54,7 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
 
     @Override
     public List<WorkerTrainingDTO> getTrainingsForFacility(int facilityId) {
+        expireOverdueTrainings(facilityId);
         List<WorkerTrainingDTO> list = new ArrayList<>();
         String sql = "SELECT t.id, ua.username as athlete_username, ut.username as trainer_username, " +
                     "s.name as sport_name, t.training_date, t.time_from, t.time_to, t.scheduled_at, t.status " +
@@ -86,9 +90,68 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
         return list;
     }
 
+    private void expireOverdueReservations(int facilityId) {
+        String selectSql = "SELECT r.id, r.athlete_id, c.facility_id " +
+                "FROM reservation r JOIN court c ON r.court_id = c.id " +
+                "WHERE c.facility_id = ? AND r.status = 'BOOKED' " +
+                "AND TIMESTAMPADD(MINUTE, 10, TIMESTAMP(r.date, r.time_from)) < NOW()";
+
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(selectSql)) {
+            stm.setInt(1, facilityId);
+            ResultSet rs = stm.executeQuery();
+
+            List<int[]> overdue = new ArrayList<>();
+            while (rs.next()) {
+                overdue.add(new int[]{rs.getInt("id"), rs.getInt("athlete_id"), rs.getInt("facility_id")});
+            }
+
+            for (int[] row : overdue) {
+                try (PreparedStatement updateStm = conn.prepareStatement(
+                        "UPDATE reservation SET status = 'NO_SHOW' WHERE id = ?")) {
+                    updateStm.setInt(1, row[0]);
+                    updateStm.executeUpdate();
+                }
+                registerNoShow(conn, row[1], row[2]);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // isto za treninge
+    private void expireOverdueTrainings(int facilityId) {
+        String selectSql = "SELECT id, athlete_id, facility_id " +
+                "FROM individual_training " +
+                "WHERE facility_id = ? AND status = 'BOOKED' " +
+                "AND TIMESTAMPADD(MINUTE, 10, TIMESTAMP(training_date, time_from)) < NOW()";
+
+        try (Connection conn = DB.source().getConnection();
+            PreparedStatement stm = conn.prepareStatement(selectSql)) {
+            stm.setInt(1, facilityId);
+            ResultSet rs = stm.executeQuery();
+
+            List<int[]> overdue = new ArrayList<>();
+            while (rs.next()) {
+                overdue.add(new int[]{rs.getInt("id"), rs.getInt("athlete_id"), rs.getInt("facility_id")});
+            }
+
+            for (int[] row : overdue) {
+                try (PreparedStatement updateStm = conn.prepareStatement(
+                        "UPDATE individual_training SET status = 'NO_SHOW' WHERE id = ?")) {
+                    updateStm.setInt(1, row[0]);
+                    updateStm.executeUpdate();
+                }
+                registerNoShow(conn, row[1], row[2]);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Message confirmReservation(int reservationId) {
-        String sql = "UPDATE reservation SET status = 'CONFIRMED' WHERE id = ? AND status = 'PENDING'";
+        String sql = "UPDATE reservation SET status = 'CONFIRMED' WHERE id = ? AND status = 'BOOKED'";
         try (Connection conn = DB.source().getConnection();
              PreparedStatement stm = conn.prepareStatement(sql)) {
             stm.setInt(1, reservationId);
@@ -105,7 +168,7 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
     public Message markNoShowReservation(int reservationId) {
         String getSql = "SELECT r.athlete_id, c.facility_id " +
                          "FROM reservation r JOIN court c ON r.court_id = c.id " +
-                         "WHERE r.id = ? AND r.status = 'PENDING'";
+                         "WHERE r.id = ? AND r.status = 'BOOKED'";
         String updateSql = "UPDATE reservation SET status = 'NO_SHOW' WHERE id = ?";
 
         try (Connection conn = DB.source().getConnection()) {
@@ -136,7 +199,7 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
 
     @Override
     public Message confirmTraining(int trainingId) {
-        String sql = "UPDATE individual_training SET status = 'CONFIRMED' WHERE id = ? AND status = 'PENDING'";
+        String sql = "UPDATE individual_training SET status = 'CONFIRMED' WHERE id = ? AND status = 'BOOKED'";
         try (Connection conn = DB.source().getConnection();
              PreparedStatement stm = conn.prepareStatement(sql)) {
             stm.setInt(1, trainingId);
@@ -152,7 +215,7 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
     @Override
     public Message markNoShowTraining(int trainingId) {
         String getSql = "SELECT athlete_id, facility_id FROM individual_training " +
-                         "WHERE id = ? AND status = 'PENDING'";
+                         "WHERE id = ? AND status = 'BOOKED'";
         String updateSql = "UPDATE individual_training SET status = 'NO_SHOW' WHERE id = ?";
 
         try (Connection conn = DB.source().getConnection()) {
@@ -212,5 +275,42 @@ public class WorkerReservationRepo implements WorkerReservationRepoInterface {
         }
 
         return new Message(true, "Marked as no-show.");
+    }
+
+    @Override
+    public AthleteBlockStatusDTO getBlockStatus(int athleteId, int facilityId) {
+        int maxNoShows = 0;
+        String facilitySql = "SELECT max_no_shows FROM facility WHERE id = ?";
+
+        String blockSql = "SELECT no_show_count, blocked FROM athlete_facility_block " +
+                        "WHERE athlete_id = ? AND facility_id = ?";
+
+        try (Connection conn = DB.source().getConnection()) {
+
+            try (PreparedStatement facilityStm = conn.prepareStatement(facilitySql)) {
+                facilityStm.setInt(1, facilityId);
+                ResultSet rs = facilityStm.executeQuery();
+                if (rs.next()) {
+                    maxNoShows = rs.getInt("max_no_shows");
+                }
+            }
+
+            try (PreparedStatement blockStm = conn.prepareStatement(blockSql)) {
+                blockStm.setInt(1, athleteId);
+                blockStm.setInt(2, facilityId);
+                ResultSet rs = blockStm.executeQuery();
+                if (rs.next()) {
+                    return new AthleteBlockStatusDTO(rs.getBoolean("blocked"), rs.getInt("no_show_count"), maxNoShows);
+                }
+            }
+
+            // atleta jos nema red u athlete_facility_block -> nema no-show-ova, nije blokiran
+            return new AthleteBlockStatusDTO(false, 0, maxNoShows);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // u slucaju greske, ne blokiramo korisnika da ne bismo neopravdano sprecili rezervaciju
+            return new AthleteBlockStatusDTO(false, 0, 0);
+        }
     }
 }

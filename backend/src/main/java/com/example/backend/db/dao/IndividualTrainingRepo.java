@@ -25,9 +25,8 @@ public class IndividualTrainingRepo implements IndividualTrainingRepoInterface{
         List<IndividualTraining> trainings = new ArrayList<>();
 
         String sql = "SELECT it.id, it.athlete_id, it.trainer_id, it.facility_id, it.sport_id, it.scheduled_at, " +
-                "it.training_date, it.time_from, it.time_to, " +
-                "u.username AS trainer_name, f.name AS facility_name, s.name AS sport_name, " +
-                "CASE WHEN TIMESTAMP(it.training_date, it.time_to) < NOW() THEN 'COMPLETED' ELSE 'SCHEDULED' END AS status " +
+                "it.training_date, it.time_from, it.time_to, it.status, " +  // ← direktno iz baze
+                "u.username AS trainer_name, f.name AS facility_name, s.name AS sport_name " +
                 "FROM individual_training it " +
                 "JOIN trainer t ON it.trainer_id = t.user_id " +
                 "JOIN user u ON t.user_id = u.id " +
@@ -73,7 +72,7 @@ public class IndividualTrainingRepo implements IndividualTrainingRepoInterface{
     public List<CourtTrainingViewDTO> getTrainingsForCourt(GetReservationObject obj) {
         List<CourtTrainingViewDTO> trainings = new ArrayList<>();
         String sql = "SELECT id, training_date, time_from, time_to, " +
-                "CASE WHEN training_date < CURDATE() THEN 'COMPLETED' ELSE 'SCHEDULED' END AS status " +
+                "CASE WHEN training_date < CURDATE() THEN 'COMPLETED' ELSE 'BOOKED' END AS status " +
                 "FROM individual_training " +
                 "WHERE court_id = ? AND training_date BETWEEN ? AND ? ";
 
@@ -171,7 +170,7 @@ public class IndividualTrainingRepo implements IndividualTrainingRepoInterface{
             String insertSql =
                 "INSERT INTO individual_training " +
                 "(athlete_id, trainer_id, facility_id, sport_id, scheduled_at, training_date, time_from, time_to, court_id, status) " +
-                "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, 'SCHEDULED')";
+                "VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?, 'BOOKED')";
 
             try (PreparedStatement stm = conn.prepareStatement(insertSql)) {
                 stm.setInt(1, req.getAthleteId());

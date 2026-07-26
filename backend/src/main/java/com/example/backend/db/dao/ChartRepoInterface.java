@@ -3,8 +3,8 @@ package com.example.backend.db.dao;
 import java.util.Map;
 
 public interface ChartRepoInterface {
-    Map<String, Integer> countResPerSport(int athleteId);
-    Map<String, Integer> countPlayedResPerSport(int athleteId);
-    Map<Integer, Integer> reservationsPerMonth(int athleteId);
-    double getTotalEquipmentSpending();
+    public Map<String, Integer> countResPerSport(int athleteId);
+    public Map<String, Integer> countPlayedResPerSport(int athleteId);
+    public Map<String, Integer> reservationsPerMonth(int athleteId);
+    public double getTotalEquipmentSpending(int athleteId);
 }

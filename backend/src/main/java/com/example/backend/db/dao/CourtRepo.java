@@ -38,6 +38,7 @@ public class CourtRepo implements CourtRepoInterface{
         return null;
     }
  
+    @Override
     public List<Court> getCourtsForFacility(int facilityId){
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
@@ -50,14 +51,16 @@ public class CourtRepo implements CourtRepoInterface{
 
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
-                courts.add(new Court(
+                Court c = new Court(
                     rs.getInt("id"),
                     rs.getInt("facility_id"),
                     rs.getString("name"),
                     rs.getString("type"),
                     rs.getInt("capacity"),
                     rs.getString("equipment_description")
-                ));
+                );
+                c.setSportId(rs.getInt("sport_id"));
+                courts.add(c);
             }
             return courts;
 
@@ -66,5 +69,4 @@ public class CourtRepo implements CourtRepoInterface{
         }
         return null;
     }
-
 }

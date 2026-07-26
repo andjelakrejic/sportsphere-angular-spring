@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.db.dao.WorkerReservationRepo;
 import com.example.backend.models.Message;
+import com.example.backend.models.helpers.AthleteBlockStatusDTO;
 import com.example.backend.models.helpers.WorkerReservationDTO;
 import com.example.backend.models.helpers.WorkerTrainingDTO;
 
@@ -46,6 +48,11 @@ public class WorkerReservationController {
     @PostMapping("/noShowTraining/{trainingId}")
     public Message noShowTraining(@PathVariable int trainingId) {
         return new WorkerReservationRepo().markNoShowTraining(trainingId);
+    }
+
+    @GetMapping("/block-status")
+    public AthleteBlockStatusDTO getBlockStatus(@RequestParam int athleteId, @RequestParam int facilityId) {
+        return new WorkerReservationRepo().getBlockStatus(athleteId, facilityId);
     }
 
 }

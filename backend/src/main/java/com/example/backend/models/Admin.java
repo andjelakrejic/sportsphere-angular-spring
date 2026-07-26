@@ -6,5 +6,7 @@ public class Admin extends User{
                 String email, String phone, String profileImage) {
         super(id, username, password, firstname, lastname, email, phone, profileImage, "/", "ADMIN");
     }
+    
+    public Admin() {}
    
 }

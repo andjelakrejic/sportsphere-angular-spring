@@ -10,8 +10,10 @@ public class TeammateAd {
     private int totalPlayersNeeded;
     private int missingPlayers;
     private String status;
-    private String createdAt;    
+    private String createdAt;  
+    private String athleteUsername;  
     
+
     public TeammateAd(int id, int athleteId, int sportId, String city, String date, String timeSlot,
             int totalPlayersNeeded, int missingPlayers, String status, String createdAt) {
         this.id = id;
@@ -101,6 +103,14 @@ public class TeammateAd {
     }
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+      public String getAthleteUsername() {
+        return athleteUsername;
+    }
+
+    public void setAthleteUsername(String athleteUsername) {
+        this.athleteUsername = athleteUsername;
     }
 
     

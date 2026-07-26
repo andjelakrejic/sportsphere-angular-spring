@@ -11,6 +11,8 @@ import com.example.backend.db.dao.TeammateRepo;
 import com.example.backend.models.Message;
 import com.example.backend.models.TeammateAd;
 import com.example.backend.models.TeammateRequest;
+import com.example.backend.models.helpers.RemovePlayerDTO;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +40,11 @@ public class TeammateController {
         return new TeammateRepo().getTeammateRequests(adId);
     }
 
+    @GetMapping("/getMySentRequestsWithStatus/{athleteId}")
+    public List<TeammateRequest> getMySentRequestsWithStatus(@PathVariable int athleteId) {
+        return new TeammateRepo().getMySentRequestsWithStatus(athleteId);
+    }
+
     @GetMapping("/getTeammateRequest") 
     public ResponseEntity<TeammateRequest> getTeammateRequest(@RequestParam int athleteId, @RequestParam int adId) { 
         TeammateRequest request = new TeammateRepo().getTeammateRequest(athleteId, adId);
@@ -54,7 +61,7 @@ public class TeammateController {
     }
 
     @PostMapping("/closeAd")
-    public Message closeAd(@RequestParam int adId) {
+    public Message closeAd(@RequestBody int adId) {
         return new TeammateRepo().closeAd(adId);
     }
 
@@ -78,7 +85,6 @@ public class TeammateController {
         return new TeammateRepo().getMySentRequests(athleteId);
     }
 
-
     @GetMapping("/getMyTeams/{athleteId}")
     public List<TeammateAd> getMyTeams(@PathVariable int athleteId) {
         return new TeammateRepo().getMyTeams(athleteId);
@@ -87,6 +93,11 @@ public class TeammateController {
     @GetMapping("/getApprovedPlayers/{adId}")
     public List<TeammateRequest> getApprovedPlayers(@PathVariable int adId) {
         return new TeammateRepo().getApprovedPlayers(adId);
+    }
+
+    @PostMapping("/removePlayerFromTeam")
+    public Message removePlayerFromTeam(@RequestBody RemovePlayerDTO obj) {
+        return new TeammateRepo().removePlayer(obj.getAdId(), obj.getAthleteId());
     }
 
 }

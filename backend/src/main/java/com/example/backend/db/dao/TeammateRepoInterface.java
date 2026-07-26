@@ -25,4 +25,6 @@ public interface TeammateRepoInterface {
     public List<TeammateAd> getMyTeams(int athleteId);
     public List<TeammateRequest> getApprovedPlayers(int adId);
 
+    public Message removePlayer(int adId, int athlete_id);
+
 }

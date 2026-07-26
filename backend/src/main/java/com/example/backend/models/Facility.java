@@ -14,27 +14,9 @@ public class Facility { // ima mnogo vise polja u bazi
     private String sports;
     private String type;
     private int maxNoShows;
-    private int workerId;
 
 
     public Facility() {}
-
-    // za sad ali promeni drugi da ima samo ovaj sa worker id jer pre u bazi nisi imala ovu kolonu
-    public Facility(int id, String name, String city, String address, String description, String workingHoursFrom,
-            String workingHoursTo, double pricePerHour, String status, int numOfLikes, int workerId) {
-        this.id = id;
-        this.name = name;
-        this.city = city;
-        this.address = address;
-        this.description = description;
-        this.workingHoursFrom = workingHoursFrom;
-        this.workingHoursTo = workingHoursTo;
-        this.pricePerHour = pricePerHour;
-        this.status = status;
-        this.numOfLikes = numOfLikes;
-        this.sports = "";
-        this.workerId = workerId;
-    }
 
     public Facility(int id, String name, String city, String address, String description, String workingHoursFrom,
             String workingHoursTo, double pricePerHour, String status, int numOfLikes) {
@@ -73,14 +55,6 @@ public class Facility { // ima mnogo vise polja u bazi
 
     public void setMaxNoShows(int maxNoShows) {
         this.maxNoShows = maxNoShows;
-    }
-
-    public int getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(int workerId) {
-        this.workerId = workerId;
     }
 
     public int getId() {

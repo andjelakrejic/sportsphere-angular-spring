@@ -27,16 +27,16 @@ public interface FacilityRepoInterface {
     public List<String> getFacilityImages(int id);
 
     // worker-facilities
-    Message addFacility(FacilityUploadDTO dto, int workerId);
-    Message updateFacility(Facility facility);
-    List<Facility> getFacilitiesByWorkerId(int workerId);
-    Message addCourt(Court court);
-    Message updateCourt(Court court);
-    List<Court> getCourtsByFacilityId(int facilityId);
+    public Message addFacility(FacilityUploadDTO dto, int workerId);
+    public Message updateFacility(Facility facility);
+    public List<Facility> getFacilitiesByWorkerId(int workerId);
+    public Message addCourt(Court court);
+    public Message updateCourt(Court court);
+    public List<Court> getCourtsByFacilityId(int facilityId);
 
     /// pdf generator
     public List<CourtOccupancyDTO> getFacilityOccupancy(int facilityId, LocalDate monthStart, LocalDate monthEnd);
 
     // admin
-    List<Facility> getPendingFacilities();
+    public List<Facility> getPendingFacilities();
 }
