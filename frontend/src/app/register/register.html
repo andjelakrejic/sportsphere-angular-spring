@@ -1,0 +1,144 @@
+<div class="register-container">
+  <div class="register-card">
+
+    <div class="register-header">
+      <h2>Create Account</h2>
+      <p>Choose your account type</p>
+    </div>
+
+    <div class="role-selector">
+      <div class="role-card" [class.selected]="selectedRole === 'ATHLETE'" (click)="selectedRole = 'ATHLETE'">
+        <span class="role-icon">🏃</span>
+        <p class="role-title">Athlete</p>
+      </div>
+      <div class="role-card" [class.selected]="selectedRole === 'EMPLOYEE'" (click)="selectedRole = 'EMPLOYEE'">
+        <span class="role-icon">💼</span>
+        <p class="role-title">Employee</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First name</label>
+          <input type="text" [(ngModel)]="formData.ime" name="ime" placeholder="Marko" required />
+        </div>
+        <div class="form-group">
+          <label>Last name</label>
+          <input type="text" [(ngModel)]="formData.prezime" name="prezime" placeholder="Jović" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" [(ngModel)]="formData.username" name="username" placeholder="marko123" required />
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="formData.email" name="email" placeholder="marko@email.com" required />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" [(ngModel)]="formData.password" name="password" placeholder="Min. 8 chars..." required />
+      </div>
+
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" [(ngModel)]="formData.telefon" name="telefon" placeholder="+381601234567" required />
+      </div>
+
+      <div class="form-group">
+        <label>Profile picture</label>
+        <div class="upload-box" (click)="fileInput.click()">
+          <img *ngIf="previewUrl" [src]="previewUrl" class="preview-img" />
+          <div *ngIf="!previewUrl" class="upload-placeholder">
+            <span>📷</span>
+            <p>Click to upload a photo</p>
+          </div>
+        </div>
+
+        <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" />
+
+        <div class="avatar-actions">
+          <button type="button" class="secondary-btn" (click)="generateAvatar()">🎨 Generate Avatar</button>
+          <button *ngIf="previewUrl" type="button" class="remove-btn" (click)="removeImage()">Remove photo</button>
+        </div>
+      </div>
+
+      <div *ngIf="selectedRole === 'EMPLOYEE'" class="employee-fields">
+        <hr />
+        <p class="section-label">Facility details</p>
+
+        <div class="form-group" *ngIf="availableFacilities.length > 0">
+          <label>Join an existing facility</label>
+          <select [(ngModel)]="selectedExistingFacilityId" name="existingFacility" (ngModelChange)="onExistingFacilitySelected()">
+            <option [ngValue]="null">-- Register a new facility --</option>
+            <option *ngFor="let f of availableFacilities" [ngValue]="f.id">
+              {{ f.name }} ({{ f.city }}, {{ f.address }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Facility name</label>
+          <input type="text" [(ngModel)]="formData.nazivObjekta" name="nazivObjekta"
+                placeholder="Sport Arena Beograd" [readonly]="selectedExistingFacilityId !== null" />
+        </div>
+
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" [(ngModel)]="formData.adresa" name="adresa"
+                placeholder="Bulevar Arsenija..." [readonly]="selectedExistingFacilityId !== null" />
+        </div>
+
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" [(ngModel)]="formData.city" name="city"
+                placeholder="Belgrade" [readonly]="selectedExistingFacilityId !== null" />
+        </div>
+
+        <div class="form-group">
+          <label>Registration number (8 digits)</label>
+          <input type="text" [(ngModel)]="formData.maticniBroj" name="maticniBroj" maxlength="8"
+                placeholder="12345678" [readonly]="selectedExistingFacilityId !== null" />
+        </div>
+
+        <div class="form-group">
+          <label>Tax ID / PIB (9 digits)</label>
+          <input type="text" [(ngModel)]="formData.pib" name="pib" maxlength="9"
+                placeholder="123456789" [readonly]="selectedExistingFacilityId !== null" />
+        </div>
+      </div>
+
+      <div *ngIf="selectedRole === 'ATHLETE'" class="form-group">
+        <div class="sports-header">
+          <label>Favorite sports (max 5)</label>
+          <span class="sports-counter">{{selectedSports.length}}/5</span>
+        </div>
+        <div class="sport-grid">
+          <div 
+            *ngFor="let sport of allSports" 
+            class="sport-chip" 
+            [class.selected]="isSelected(sport)"
+            (click)="toggleSport(sport)">
+            {{sport.name}}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Sending...' : 'Submit registration request' }}
+      </button>
+
+      <p class="login-link">Already have an account? <a routerLink="/loginUser">Sign in</a></p>
+
+      <p class="login-link" style="margin-top: 15px;"><a routerLink="">← Back to Home</a></p>
+    </form>
+  </div>
+</div>

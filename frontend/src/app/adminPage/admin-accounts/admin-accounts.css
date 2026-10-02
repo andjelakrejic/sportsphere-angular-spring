@@ -1,0 +1,125 @@
+.accounts-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.accounts-container h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.table-wrapper {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table th {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.styled-table td {
+  font-size: 13px;
+  color: #1a1a1a;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f2f2f2;
+  vertical-align: middle;
+}
+
+.styled-table td input {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-right: 4px;
+  width: 100px;
+}
+
+.styled-table td input:focus {
+  outline: none;
+  border-color: #378ADD;
+}
+
+.role-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  background: #eee;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  border: none;
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.primary-btn {
+  background: #1a1a1a;
+  color: white;
+}
+
+.secondary-btn {
+  background: #eee;
+  color: #1a1a1a;
+}
+
+.danger-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover,
+.danger-btn:hover {
+  opacity: 0.85;
+}
+
+.empty-msg {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.success-msg {
+  font-size: 13px;
+  color: #27ae60;
+  text-align: center;
+}
+
+.error-msg {
+  font-size: 13px;
+  color: #e74c3c;
+  text-align: center;
+}

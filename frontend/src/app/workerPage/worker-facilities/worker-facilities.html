@@ -1,0 +1,243 @@
+<app-worker-nav-bar></app-worker-nav-bar>
+<div class="facilities-container">
+
+  @if (feedbackMessage) {
+    <div [class]="feedbackSuccess ? 'success-msg' : 'error-msg'">
+      {{ feedbackMessage }}
+    </div>
+  }
+
+  <div class="section">
+    <h2 class="section-title">Your facilities</h2>
+
+    <div class="facility-selector-row">
+      @if (facilities.length > 0) {
+        <label>Select facility:</label>
+        <select class="facility-select" [(ngModel)]="selectedFacilityId" (ngModelChange)="onFacilityChange()">
+          @for (f of facilities; track f.id) {
+            <option [ngValue]="f.id">{{ f.name }} ({{ f.city }}) - {{ f.status }}</option>
+          }
+        </select>
+      } @else {
+        <span class="no-facilities">No facilities yet.</span>
+      }
+
+      <button class="primary-btn" (click)="toggleAddFacilityForm()">
+        {{ showAddFacilityForm ? 'Cancel' : 'Add new facility' }}
+      </button>
+    </div>
+
+    @if (showAddFacilityForm) {
+      <div class="form-grid">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="newFacility.name" name="name">
+
+        <label>City</label>
+        <input type="text" [(ngModel)]="newFacility.city" name="city">
+
+        <label>Registration Number</label>
+        <input type="number" maxlength="8" [(ngModel)]="newFacility.registrationNumber" name="registrationNumber">
+
+        <label>TaxId</label>
+        <input type="number" maxlength="9" [(ngModel)]="newFacility.taxId" name="taxId">
+
+        <label>Address</label>
+        <input type="text" [(ngModel)]="newFacility.address" name="address">
+
+        <label>Description</label>
+        <textarea [(ngModel)]="newFacility.description" name="description"></textarea>
+
+        <label>Working hours from</label>
+        <input type="time" [(ngModel)]="newFacility.workingHoursFrom" name="workingHoursFrom">
+
+        <label>Working hours to</label>
+        <input type="time" [(ngModel)]="newFacility.workingHoursTo" name="workingHoursTo">
+
+        <label>Price per hour</label>
+        <input type="number" [(ngModel)]="newFacility.pricePerHour" name="pricePerHour">
+
+        <label>Max no-shows before block</label>
+        <input type="number" [(ngModel)]="newFacility.maxNoShows" name="maxNoShows">
+
+        <button class="primary-btn" (click)="submitNewFacility()">Submit for approval</button>
+
+        <hr class="form-divider">
+
+        <label>Or upload via JSON file</label>
+        <div class="upload-row">
+          <input type="file" accept=".json" (change)="onFileSelected($event)">
+          <button class="secondary-btn" (click)="submitJsonUpload()">Upload JSON</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (selectedFacility) {
+  <div class="section">
+    <div class="facility-header-row">
+      <h2 class="facility-title">{{ selectedFacility.name }}</h2>
+      <button class="secondary-btn" (click)="toggleEditFacilityForm()">
+        {{ showEditFacilityForm ? 'Cancel' : 'Edit facility' }}
+      </button>
+    </div>
+
+    <p class="facility-meta">
+      {{ selectedFacility.city }}, {{ selectedFacility.address }} &middot;
+      <span class="status-badge" [class.pending]="selectedFacility.status === 'PENDING'"
+                                [class.rejected]="selectedFacility.status === 'REJECTED'">
+        {{ selectedFacility.status }}
+      </span>
+    </p>
+
+    <!-- 1. Edit form opens right below the meta info if clicked -->
+    @if (showEditFacilityForm) {
+      <div class="form-grid">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="editFacility.name" name="editName">
+
+        <label>City</label>
+        <input type="text" [(ngModel)]="editFacility.city" name="editCity">
+
+        <label>Address</label>
+        <input type="text" [(ngModel)]="editFacility.address" name="editAddress">
+
+        <label>Description</label>
+        <textarea [(ngModel)]="editFacility.description" name="editDescription"></textarea>
+
+        <label>Working hours from</label>
+        <input type="time" [(ngModel)]="editFacility.workingHoursFrom" name="editWorkingHoursFrom">
+
+        <label>Working hours to</label>
+        <input type="time" [(ngModel)]="editFacility.workingHoursTo" name="editWorkingHoursTo">
+
+        <label>Price per hour</label>
+        <input type="number" [(ngModel)]="editFacility.pricePerHour" name="editPricePerHour">
+
+        <label>Max no-shows before block</label>
+        <input type="number" [(ngModel)]="editFacility.maxNoShows" name="editMaxNoShows">
+
+        <button class="primary-btn" (click)="submitEditFacility()">Save changes</button>
+      </div>
+    }
+
+    <!-- 2. Hide courts, court warnings, and 'Add court' forms if status is PENDING -->
+    @if (selectedFacility.status !== 'PENDING') {
+      @if (!hasValidOpenCourt) {
+        <div class="warning-msg">
+          Missing at least one open court with capacity of 4 or more.
+        </div>
+      }
+
+      <button class="secondary-btn" (click)="toggleAddCourtForm()">
+        {{ showAddCourtForm ? 'Cancel' : 'Add court / hall' }}
+      </button>
+
+      @if (showAddCourtForm) {
+        <div class="form-grid">
+          <label>Name</label>
+          <input type="text" [(ngModel)]="newCourt.name" name="courtName">
+
+          <label>Type</label>
+          <select [(ngModel)]="newCourt.type" name="courtType">
+            <option value="OPEN">Open court</option>
+            <option value="CLOSED">Closed court</option>
+            <option value="HALL">Hall</option>
+          </select>
+
+          <label>Capacity</label>
+          <input type="number" [(ngModel)]="newCourt.capacity" name="capacity">
+
+          <label>Sport</label>
+          <select [(ngModel)]="newCourt.sportId" name="sportId">
+            <option [value]="0" disabled>Select sport</option>
+            @for (s of sports; track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+
+          <label>Equipment description</label>
+          <textarea maxlength="300" [(ngModel)]="newCourt.equipmentDescription" name="equipmentDescription"></textarea>
+          <span class="char-count">{{ newCourt.equipmentDescription.length }} / 300</span>
+          @if (newCourtError) {
+            <div class="error-msg">{{ newCourtError }}</div>
+          }
+          <button class="primary-btn" (click)="submitNewCourt()">Add</button>
+        </div>
+      }
+
+      <!-- Open Courts Table -->
+      <div class="court-group">
+        <h3 class="court-group-title open">Open courts</h3>
+        @if (openCourts.length > 0) {
+          <div class="table-wrapper">
+            <table class="styled-table">
+              <thead><tr><th>Name</th><th>Capacity</th><th>Sport</th><th>Equipment</th></tr></thead>
+              <tbody>
+                @for (c of openCourts; track c.id) {
+                  <tr>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.capacity }}</td>
+                    <td>{{ getSportName(c.sportId) }}</td>
+                    <td>{{ c.equipmentDescription }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty-group">No open courts.</p>
+        }
+      </div>
+
+      <!-- Closed Courts Table -->
+      <div class="court-group">
+        <h3 class="court-group-title closed">Closed courts</h3>
+        @if (closedCourts.length > 0) {
+          <div class="table-wrapper">
+            <table class="styled-table">
+              <thead><tr><th>Name</th><th>Capacity</th><th>Sport</th><th>Equipment</th></tr></thead>
+              <tbody>
+                @for (c of closedCourts; track c.id) {
+                  <tr>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.capacity }}</td>
+                    <td>{{ getSportName(c.sportId) }}</td>
+                    <td>{{ c.equipmentDescription }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty-group">No closed courts.</p>
+        }
+      </div>
+
+      <!-- Halls Table -->
+      <div class="court-group">
+        <h3 class="court-group-title hall">Halls</h3>
+        @if (hallCourts.length > 0) {
+          <div class="table-wrapper">
+            <table class="styled-table">
+              <thead><tr><th>Name</th><th>Capacity</th><th>Sport</th><th>Equipment</th></tr></thead>
+              <tbody>
+                @for (c of hallCourts; track c.id) {
+                  <tr>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.capacity }}</td>
+                    <td>{{ getSportName(c.sportId) }}</td>
+                    <td>{{ c.equipmentDescription }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty-group">No halls.</p>
+        }
+      </div>
+    }
+  </div>
+}
+
+</div>

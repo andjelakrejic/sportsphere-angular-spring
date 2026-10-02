@@ -1,0 +1,47 @@
+<app-admin-nav-bar></app-admin-nav-bar>
+
+<div class="requests-container">
+  <h2>Registration Requests</h2>
+
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of requests; track r.id) {
+          <tr>
+            <td>{{r.username}}</td>
+            <td>{{r.firstname}} {{r.lastname}}</td>
+            <td>{{r.email}}</td>
+            <td>{{r.phone}}</td>
+            <td>
+              <span class="role-badge">{{r.role}}</span>
+            </td>
+            <td class="actions-cell">
+              <button class="primary-btn" (click)="approve(r.id)">Approve</button>
+              <button class="danger-btn" (click)="deny(r.id)">Deny</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (requests.length === 0) {
+      <p class="empty-msg">No pending requests.</p>
+    }
+  </div>
+
+  @if (message) {
+    <div [class.success-msg]="message.success" [class.error-msg]="!message.success">
+      {{message.message}}
+    </div>
+  }
+</div>

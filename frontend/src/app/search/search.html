@@ -1,0 +1,68 @@
+<div class="search-container">
+  <div class="search-form">
+    <div class="form-group">
+      <label>Facility name</label>
+      <input type="text" [(ngModel)]="searchParams.name" placeholder="Search by name..." />
+    </div>
+
+    <div class="form-group">
+      <label>City</label>
+      <select [(ngModel)]="searchParams.city">
+        <option value="">All cities</option>
+        @for(city of cities; track city){
+          <option [value]="city">{{city}}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Sport</label>
+      <select [(ngModel)]="searchParams.sport">
+        <option value="">All sports</option>
+        @for(sport of sports; track sport){
+          <option [value]="sport">{{sport}}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Court type</label>
+      <select [(ngModel)]="searchParams.type">
+        <option value="">All types</option>
+        <option value="OPEN">Open</option>
+        <option value="CLOSED">Closed</option>
+      </select>
+    </div>
+
+    <button (click)="search()">Search</button>
+  </div>
+
+  @if(facilities.length > 0){
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th (click)="sort('name')">Name ↕</th>
+          <th (click)="sort('city')">City ↕</th>
+          <th (click)="sort('sports')">Sport ↕</th>
+          <th>Type</th>
+          <th>Price/h</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(f of facilities; track f.id){
+          <tr>
+            <td>{{f.name}}</td>
+            <td>{{f.city}}</td>
+            <td>{{f.sports}}</td>
+            <td>{{f.type}}</td>
+            <td>{{f.pricePerHour}} RSD</td>
+            <td><button (click)="goToDetails(f.id)">Details</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="no-results">No facilities found.</p>
+  }
+</div>

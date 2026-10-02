@@ -1,0 +1,19 @@
+<nav class="admin-navbar">
+  <div class="nav-brand" (click)="openAccounts()">
+    <span class="brand-icon">⚽</span>
+    <span class="brand-name">SportSphere Hub</span>
+  </div>
+
+  <div class="nav-menu" [class.open]="menuOpen">
+    <button (click)="openAccounts()">User Accounts</button>
+    <button (click)="openRequests()">Regestration Requests</button>
+    <button (click)="openFacility()">Facility Requests</button>
+    <button (click)="openSports()">Sports</button>
+    <button (click)="openTrainers()">Trainers</button>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+
+  <button class="hamburger" (click)="menuOpen = !menuOpen" aria-label="Meni">
+    <span></span><span></span><span></span>
+  </button>
+</nav>

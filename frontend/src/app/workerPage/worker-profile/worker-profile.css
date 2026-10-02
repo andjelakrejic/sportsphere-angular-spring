@@ -1,0 +1,341 @@
+.profile-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+}
+
+/* Profil header i slika */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+
+.profile-image {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #eee;
+}
+
+.image-edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* Smanjeno sa 12px da lepše legne ime objekta ispod */
+}
+
+.username {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.facility-name {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Detalji i Forme */
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.profile-details label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.profile-details input {
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.profile-details input:focus {
+  border-color: #378ADD;
+}
+
+/* Stil za fiksne tekstualne podatke (npr. ime i grad objekta) */
+.profile-details span {
+  padding: 4px 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* H4 podnaslovi za terene */
+.section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+/* Dugmad */
+
+.primary-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #378ADD;
+  color: white;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+/* Tabele */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 15px; /* Razmak između tabela */
+}
+
+.styled-table thead tr {
+  border-bottom: 1px solid #eee;
+}
+
+.styled-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 500;
+  color: #666;
+  font-size: 12px;
+}
+
+.styled-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #333;
+}
+
+.styled-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+/* Poruke (Success & Error) */
+
+.success-msg {
+  margin-top: 12px;
+  background: #f0fff4;
+  border: 1px solid #d4edda;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #1e7e34;
+}
+
+.error-msg {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  background: #fff0f0;
+  border: 1px solid #f8d7da;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #c0392b;
+  font-weight: 500;
+}
+
+/* My Facilities — kartice po objektu */
+
+.facility-card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.facility-card:last-child {
+  margin-bottom: 0;
+}
+
+.facility-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.facility-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.facility-card-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+
+.facility-card-empty {
+  font-style: italic;
+  color: #aaa;
+}
+
+.inline-warning {
+  font-size: 11px;
+  color: #b8860b;
+  background: #fff8e1;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: #fff8e1;
+  color: #b8860b;
+}
+
+.status-approved {
+  background: #f0fff4;
+  color: #1e7e34;
+}
+
+.status-rejected {
+  background: #fff0f0;
+  color: #c0392b;
+}
+
+.courts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.courts-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.courts-block-header h5 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+}
+
+.courts-count {
+  background: #f5f5f5;
+  color: #666;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.empty-row {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  padding: 14px 12px !important;
+}
+
+.no-facilities-msg {
+  color: #666;
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+@media (max-width: 700px) {
+  .courts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .facility-card-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Mobilna responzivnost */
+
+@media (max-width: 700px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}

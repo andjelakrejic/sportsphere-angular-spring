@@ -1,0 +1,83 @@
+<app-worker-nav-bar></app-worker-nav-bar>
+<div class="calendar-card">
+
+  <div class="calendar-header">
+    <div class="facility-select">
+      <label>Facility:</label>
+      <select [(ngModel)]="selectedFacility" (ngModelChange)="onFacilityChange()">
+        @for (f of facilities; track f.id) {
+          <option [ngValue]="f">{{f.name}}</option>
+        }
+      </select>
+    </div>
+
+    <div class="court-select">
+      <label>Court / Hall:</label>
+      <select [(ngModel)]="selectedCourt" (ngModelChange)="onCourtChange()">
+        @for (c of courts; track c.id) {
+          <option [ngValue]="c">{{c.name}} ({{c.type}})</option>
+        }
+      </select>
+    </div>
+
+    <div class="week-nav">
+      <button (click)="prevWeek()">‹ Last week</button>
+      <span class="week-label">{{weekDays[0] | date:'dd.MM'}} - {{weekDays[6] | date:'dd.MM.yyyy'}}</span>
+      <button (click)="nextWeek()">Next week ›</button>
+    </div>
+  </div>
+
+  @if (!selectedCourt) {
+    <p class="empty-msg">There aren't any available courts for this facility.</p>
+  } @else {
+    <table class="calendar-table" cdkDropListGroup>
+      <thead>
+        <tr>
+          <th></th>
+          @for (day of weekDays; track day) {
+            <th>{{day | date:'EEE'}}<br>{{day | date:'dd.MM'}}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (time of timeSlots; track time) {
+          <tr>
+            <td class="time-label">{{time}}</td>
+            @for (day of weekDays; track day) {
+              <td class="slot-cell"
+                  cdkDropList
+                  [id]="dropListId(day, time)"
+                  [cdkDropListConnectedTo]="getAllDropListIds()"
+                  (cdkDropListDropped)="onDrop($event, day, time)">
+
+                @if (getItem(day, time); as item) {
+                  <div
+                    class="slot-card"
+                    [class.reservation]="item.type === 'RESERVATION'"
+                    [class.training]="item.type === 'TRAINING'"
+                    [class.non-draggable]="!isDraggable"
+                    cdkDrag
+                    [cdkDragData]="item">
+                    <span class="slot-type">{{item.type === 'RESERVATION' ? 'Reservation' : 'Training'}}</span><br>
+                    <span class="slot-time">{{item.timeFrom | date:'HH:mm'}} - {{item.timeTo | date:'HH:mm'}}</span>
+                  </div>
+                } @else {
+                  <div class="slot-free"></div>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot free"></div>Available</div>
+    <div class="legend-item"><div class="dot reservation"></div>Reserved</div>
+    <div class="legend-item"><div class="dot training"></div>Training</div>
+  </div>
+
+  <span class="message" *ngIf="message">{{message}}</span>
+
+</div>

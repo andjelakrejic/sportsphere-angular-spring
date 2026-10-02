@@ -1,0 +1,120 @@
+<app-worker-nav-bar></app-worker-nav-bar>
+
+<div class="facilities-container">
+
+  @if (feedbackMessage) {
+    <div [class]="feedbackSuccess ? 'success-msg' : 'error-msg'">
+      {{ feedbackMessage }}
+    </div>
+  }
+
+  <div class="section">
+    <h2 class="section-title">Reservations & trainings</h2>
+
+    <div class="facility-selector-row">
+      @if (facilities.length > 0) {
+        <label>Select facility:</label>
+        <select class="facility-select" [(ngModel)]="selectedFacilityId" (ngModelChange)="onFacilityChange()">
+          @for (f of facilities; track f.id) {
+            <option [value]="f.id">{{ f.name }} ({{ f.city }})</option>
+          }
+        </select>
+      } @else {
+        <span class="no-facilities">No facilities yet.</span>
+      }
+    </div>
+  </div>
+
+  @if (selectedFacilityId !== null) {
+    <div class="section">
+      <h3 class="court-group-title">Court reservations</h3>
+
+      @if (reservations.length > 0) {
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Court</th><th>Athlete</th><th>Sport</th>
+                <th>Date</th><th>Time</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of reservations; track r.id) {
+                <tr>
+                  <td>{{ r.courtName }}</td>
+                  <td>{{ r.athleteUsername }}</td>
+                  <td>{{ r.sportName }}</td>
+                  <td>{{ r.date }}</td>
+                  <td>{{ r.timeFrom | slice:0:5 }} - {{ r.timeTo | slice:0:5 }}</td>
+                  <td>
+                    <span class="status-badge"
+                          [class.upcoming]="r.status === 'BOOKED'"
+                          [class.confirmed]="r.status === 'CONFIRMED'"
+                          [class.missed]="r.status === 'NO_SHOW'"
+                          [class.cancelled]="r.status === 'CANCELLED'">
+                      {{ formatStatus(r.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (showReservationActions(r)) {
+                      <button class="primary-btn" (click)="confirmReservation(r)">Confirm</button>
+                      <button class="danger-btn" (click)="noShowReservation(r)">No-show</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-group">No reservations for this facility.</p>
+      }
+    </div>
+
+    <div class="section">
+      <h3 class="court-group-title">Individual trainings</h3>
+
+      @if (trainings.length > 0) {
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Athlete</th><th>Trainer</th><th>Sport</th>
+                    <th>Date</th><th>Time</th><th>Status</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (t of trainings; track t.id) {
+                    <tr>
+                    <td>{{ t.athleteUsername }}</td>
+                    <td>{{ t.trainerUsername }}</td>
+                    <td>{{ t.sportName }}</td>
+                    <td>{{ t.trainingDate }}</td>
+                    <td>{{ t.timeFrom | slice:0:5 }} - {{ t.timeTo | slice:0:5 }}</td>
+                    <td>
+                      <span class="status-badge"
+                            [class.upcoming]="t.status === 'BOOKED'"
+                            [class.confirmed]="t.status === 'CONFIRMED'"
+                            [class.missed]="t.status === 'NO_SHOW'"
+                            [class.cancelled]="t.status === 'CANCELLED'">
+                        {{ formatStatus(t.status) }}
+                      </span>
+                    </td>
+                    <td>
+                        @if (showTrainingActions(t)) {
+                        <button class="primary-btn" (click)="confirmTraining(t)">Confirm</button>
+                        <button class="danger-btn" (click)="noShowTraining(t)">No-show</button>
+                        }
+                    </td>
+                    </tr>
+                }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-group">No trainings for this facility.</p>
+      }
+    </div>
+  }
+
+</div>

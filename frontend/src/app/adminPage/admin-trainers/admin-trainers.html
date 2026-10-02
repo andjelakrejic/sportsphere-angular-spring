@@ -1,0 +1,50 @@
+<app-admin-nav-bar></app-admin-nav-bar>
+
+<div class="trainers-container">
+  <h2>Trainers</h2>
+
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Facility</th>
+          <th>Specialization</th>
+          <th>Price / hour</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of trainers; track t.id) {
+          <tr>
+            <td>{{t.firstName}} {{t.lastName}}</td>
+            <td>{{t.facilityName}}</td>
+            <td>{{t.specialization}}</td>
+            <td>{{t.pricePerHour}} RSD</td>
+            <td>
+              <span class="status-badge" [class.inactive]="t.status === 'INACTIVE'">
+                {{t.status}}
+              </span>
+            </td>
+            <td class="actions-cell">
+              @if (t.status === 'ACTIVE') {
+                <button class="danger-btn" (click)="deactivate(t.id)">Deactivate</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (trainers.length === 0) {
+      <p class="empty-msg">No trainers found.</p>
+    }
+  </div>
+
+  @if (message) {
+    <div [class.success-msg]="message.success" [class.error-msg]="!message.success">
+      {{message.message}}
+    </div>
+  }
+</div>

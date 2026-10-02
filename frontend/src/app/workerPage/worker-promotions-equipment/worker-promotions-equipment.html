@@ -1,0 +1,181 @@
+<app-worker-nav-bar></app-worker-nav-bar>
+<div class="section">
+
+  <div class="tabs">
+    <button class="secondary-btn" [class.primary-btn]="activeTab === 'promotions'" (click)="setTab('promotions')">Promotions</button>
+    <button class="secondary-btn" [class.primary-btn]="activeTab === 'equipment'" (click)="setTab('equipment')">Equipment</button>
+    <button class="secondary-btn" [class.primary-btn]="activeTab === 'orders'" (click)="setTab('orders')">Orders</button>
+  </div>
+
+  @if (successMsg) { <p class="success-msg">{{ successMsg }}</p> }
+  @if (errorMsg) { <p class="error-msg">{{ errorMsg }}</p> }
+
+  <!-- PROMOTIONS -->
+  @if (activeTab === 'promotions') {
+
+    @if (facilities.length > 0) {
+      <div class="facility-selector-row">
+        <label>Facility:</label>
+        <select class="facility-select" [(ngModel)]="selectedFacilityId" (ngModelChange)="onFacilityChange()" name="selectedFacility">
+          @for (f of facilities; track f.id) {
+            <option [ngValue]="f.id">{{ f.name }} ({{ f.city }})</option>
+          }
+        </select>
+      </div>
+    } @else {
+      <p class="no-facilities">You are not assigned to any facility yet.</p>
+    }
+
+    <div class="section">
+      <h3>{{ editingPromotionId ? 'Edit Promotion' : 'New Promotion' }}</h3>
+      <form (ngSubmit)="savePromotion()">
+        <label>Promotion:<input [(ngModel)]="promotionForm.name" name="name" placeholder="Enter name" required /></label>
+
+        <label>Sport: <select [(ngModel)]="promotionForm.sportId" name="sportId" required>
+          <option [ngValue]="0" disabled>Select sport</option>
+          @for (s of promotionSports; track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select></label>
+
+        <label>From: <input type="date" [(ngModel)]="promotionForm.dateFrom" name="dateFrom" required /></label>
+        <label>To: <input type="date" [(ngModel)]="promotionForm.dateTo" name="dateTo" required /></label>
+
+        <label>Discount type: <select [(ngModel)]="promotionForm.discountType" name="discountType" required>
+          <option value="" disabled>Select type</option>
+          <option value="PERCENTAGE">Percentage (%)</option>
+          <option value="FIXED">Fixed amount</option>
+        </select></label>
+
+        <label>Value: <input type="number" [(ngModel)]="promotionForm.discountValue" name="discountValue" placeholder="Discount value" step="0.01" required /></label>
+
+        <button class="primary-btn" type="submit">{{ editingPromotionId ? 'Save changes' : 'Add promotion' }}</button>
+        @if (editingPromotionId) {
+          <button class="secondary-btn" type="button" (click)="resetPromotionForm()">Cancel</button>
+        }
+      </form>
+    </div>
+    <br>
+
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Name</th><th>Sport</th><th>Facility</th><th>From</th><th>To</th><th>Discount</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of promotions; track p.id) {
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.sportName }}</td>
+            <td>{{ p.facilityName }}</td>
+            <td>{{ p.dateFrom }}</td>
+            <td>{{ p.dateTo }}</td>
+            <td>{{ p.discountValue }}{{ p.discountType === 'PERCENTAGE' ? '%' : ' RSD' }}</td>
+            <td>
+              <span class="status-badge">{{ isPromotionActive(p) ? 'Active' : 'Inactive' }}</span>
+            </td>
+            <td><button class="secondary-btn" (click)="editPromotion(p)">Edit</button></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7">No promotions for this facility.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <!-- EQUIPMENT -->
+  @if (activeTab === 'equipment') {
+    <div class="section">
+      <h3>{{ editingEquipmentId ? 'Edit Equipment' : 'New Equipment' }}</h3>
+      <form (ngSubmit)="saveEquipment()">
+        <label>Equipment: <input [(ngModel)]="equipmentForm.name" name="name" placeholder="Enter name" required /></label>
+
+        <label>Sport: <select [(ngModel)]="equipmentForm.sportId" name="sportId" required>
+          <option [ngValue]="0" disabled>Select sport</option>
+          @for (s of equipmentSports; track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select></label>
+
+        <label>Price: <input type="number" [(ngModel)]="equipmentForm.price" name="price" placeholder="Price" step="0.01" required /></label>
+        <label>Stock quantity: <input type="number" [(ngModel)]="equipmentForm.stockQuantity" name="stockQuantity" placeholder="Stock quantity" required /></label>
+        <label>Description: <textarea [(ngModel)]="equipmentForm.description" name="description" maxlength="300" placeholder="Description (up to 300 characters)"></textarea></label>
+        <div class="equipment-image-upload">
+        <label class="upload-box">
+          @if(equipmentPreviewUrl) {
+            <img [src]="equipmentPreviewUrl" class="preview-img" />
+          } @else {
+            <span>📷</span>
+            <p>Click to upload</p>
+          }
+          <input type="file" accept="image/*" 
+                (change)="onEquipmentImageSelected($event)" 
+                style="display:none" />
+        </label>
+      </div>
+
+        <button class="primary-btn" type="submit">{{ editingEquipmentId ? 'Save changes' : 'Add equipment' }}</button>
+        @if (editingEquipmentId) {
+          <button class="secondary-btn" type="button" (click)="resetEquipmentForm()">Cancel</button>
+        }
+      </form>
+    </div>
+
+    <table class="styled-table">
+      <thead>
+        <tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (e of equipment; track e.id) {
+          <tr>
+            <td><img [src]="getImageUrl(e.imageUrl)" width="50" /></td>
+            <td>{{ e.name }}</td>
+            <td>{{ e.price }} RSD</td>
+            <td>{{ e.stockQuantity }}</td>
+            <td><button class="secondary-btn" (click)="editEquipment(e)">Edit</button></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5">No equipment in the catalog.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <!-- ORDERS -->
+  @if (activeTab === 'orders') {
+    <table class="styled-table">
+      <thead>
+        <tr><th>#</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        @for (o of orders; track o.id) {
+          <tr>
+            <td>{{ o.id }}</td>
+            <td>{{ o.createdAt }}</td>
+            <td>
+              @for (item of o.items; track item.id) {
+                <div>{{ getEquipmentName(item.equipmentId) }} x{{ item.quantity }}</div>
+              }
+            </td>
+            <td>{{ o.totalPrice }} RSD</td>
+            <td><span class="status-badge">{{ o.status }}</span></td>
+            <td>
+              @if (o.status === 'ORDERED') {
+                <button class="primary-btn" (click)="updateStatus(o, 'ACCEPTED')">Accept</button>
+                <button class="danger-btn" (click)="updateStatus(o, 'CANCELED')">Cancel</button>
+              }
+              @if (o.status === 'ACCEPTED') {
+                <button class="primary-btn" (click)="updateStatus(o, 'PICKED UP')">Mark picked up</button>
+                <button class="danger-btn" (click)="updateStatus(o, 'CANCELED')">Cancel</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6">No orders.</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

@@ -1,0 +1,238 @@
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+
+/* Buttons */
+.primary-btn {
+  background-color: #378ADD;
+  color: #fff;
+  border: none;
+  height: 38px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.primary-btn:hover {
+  background-color: #2c6fb3;
+}
+
+.secondary-btn {
+  background-color: #fff;
+  color: #378ADD;
+  border: 1px solid #378ADD;
+  height: 38px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background-color: #f0f6fd;
+}
+
+.danger-btn {
+  background-color: #fff;
+  color: #d9534f;
+  border: 1px solid #d9534f;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.danger-btn:hover {
+  background-color: #fdecea;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end; /* Align inputs and buttons along the bottom baseline */
+  margin-top: 12px;
+}
+
+form input,
+form select,
+form textarea {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 160px;
+  box-sizing: border-box;
+  height: 38px; /* Force uniform height across inputs, selects, and buttons */
+}
+
+form textarea {
+  min-width: 240px;
+  min-height: 60px;
+  height: auto;
+  resize: vertical;
+}
+
+form label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* .primary-btn, 
+.secondary-btn {
+  height: 38px; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+/* Table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.styled-table th {
+  background-color: #f7f9fc;
+  color: #444;
+  font-weight: 600;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #fafbfd;
+}
+
+.styled-table img {
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #eef4fc;
+  color: #378ADD;
+}
+
+/* Messages */
+.success-msg {
+  background-color: #e6f7ee;
+  color: #1e7e42;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.error-msg {
+  background-color: #fdecea;
+  color: #c0392b;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Facility selector (Promotions tab) */
+.facility-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.facility-selector-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.facility-select {
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 220px;
+  box-sizing: border-box;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.no-facilities {
+  color: #888;
+  font-size: 14px;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.upload-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  overflow: hidden;
+  background-color: #f7f9fc;
+}
+
+.upload-box:hover {
+  border-color: #378ADD;
+  background-color: #f0f6fd;
+}
+
+.upload-box p {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin: 0;
+}
+
+.upload-box .preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,0 +1,62 @@
+<app-admin-nav-bar></app-admin-nav-bar>
+
+<div class="accounts-container">
+  <h2>User Accounts</h2>
+
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users; track u.id) {
+          <tr>
+            @if (editingUser && editingUser.id === u.id) {
+              <td>{{u.username}}</td>
+              <td>
+                <input type="text" [(ngModel)]="editingUser.firstname" placeholder="First name" />
+                <input type="text" [(ngModel)]="editingUser.lastname" placeholder="Last name" />
+              </td>
+              <td><input type="email" [(ngModel)]="editingUser.email" /></td>
+              <td><input type="text" [(ngModel)]="editingUser.phone" /></td>
+              <td>{{u.role}}</td>
+              <td class="actions-cell">
+                <button class="primary-btn" (click)="saveEdit()">Save</button>
+                <button class="secondary-btn" (click)="cancelEdit()">Cancel</button>
+              </td>
+            } @else {
+              <td>{{u.username}}</td>
+              <td>{{u.firstname}} {{u.lastname}}</td>
+              <td>{{u.email}}</td>
+              <td>{{u.phone}}</td>
+              <td>
+                <span class="role-badge">{{u.role}}</span>
+              </td>
+              <td class="actions-cell">
+                <button class="secondary-btn" (click)="startEdit(u)">Edit</button>
+                <button class="danger-btn" (click)="deleteUser(u.id)">Delete</button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (users.length === 0) {
+      <p class="empty-msg">No accounts found.</p>
+    }
+  </div>
+
+  @if (message) {
+    <div [class.success-msg]="message.success" [class.error-msg]="!message.success">
+      {{message.message}}
+    </div>
+  }
+</div>

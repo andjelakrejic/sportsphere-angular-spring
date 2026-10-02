@@ -1,0 +1,151 @@
+<app-worker-nav-bar></app-worker-nav-bar>
+<div class="profile-container">
+
+  <section class="section profile-header">
+    <div class="image-wrapper">
+      <img class="profile-image" [src]="imagePreview || profileImageUrl" alt="Profile image" />
+      <label class="image-edit-btn">
+        +
+        <input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+      </label>
+    </div>
+
+    <div class="profile-info">
+      <h2 class="username">&#64;{{worker.username}}</h2>
+      <p class="facility-name">{{worker.nameOfPlace}}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">✏️ Edit Profile Information</h3>
+
+    <div class="profile-details">
+      <label>Firstname</label>
+      <input type="text" [(ngModel)]="worker.firstname" />
+
+      <label>Lastname</label>
+      <input type="text" [(ngModel)]="worker.lastname" />
+
+      <label>Email</label>
+      <input type="email" [(ngModel)]="worker.email" />
+
+      <label>Phone number</label>
+      <input type="text" [(ngModel)]="worker.phone" />
+    </div>
+
+    <button class="primary-btn" (click)="saveChanges()">
+      Save changes
+    </button>
+
+    @if(message1){
+      <div class="success-msg">{{message1.message}}</div>
+    }
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">🏟️ My Facilities</h3>
+
+    @for (item of facilities; track item.facility.id) {
+      <div class="facility-card">
+
+        <div class="facility-card-header">
+          <div>
+            <h4 class="facility-card-title">{{item.facility.name}}</h4>
+            <p class="facility-card-subtitle">📍 {{item.facility.city || 'No city set'}}</p>
+            @if(item.facility.sports) {
+              <p class="facility-card-subtitle">{{item.facility.sports}}</p>
+            } @else {
+              <p class="facility-card-subtitle facility-card-empty">No sports listed yet</p>
+            }
+          </div>
+          <span class="status-badge" [class]="'status-' + item.facility.status.toLowerCase()">
+            {{item.facility.status}}
+          </span>
+        </div>
+
+        <div class="courts-grid">
+
+          <div class="courts-block">
+            <div class="courts-block-header">
+              <h5>Open courts</h5>
+              <span class="courts-count">{{item.openCourts.length}}</span>
+              @if(!item.hasValidOpenCourt){
+                <span class="inline-warning">⚠️ Needs ≥4 capacity</span>
+              }
+            </div>
+            <div class="table-wrapper">
+              <table class="styled-table">
+                <thead><tr><th>Name</th><th>Capacity</th></tr></thead>
+                <tbody>
+                  @for (c of item.openCourts; track c.id) {
+                    <tr>
+                      <td>{{c.name}}</td>
+                      <td>{{c.capacity}}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="2" class="empty-row">No open courts yet</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="courts-block">
+            <div class="courts-block-header">
+              <h5>Closed courts/halls</h5>
+              <span class="courts-count">{{item.closedCourts.length}}</span>
+            </div>
+            @if(!item.closedNamesUnique){
+              <div class="error-msg">⚠️ Duplicate names found</div>
+            }
+            <div class="table-wrapper">
+              <table class="styled-table">
+                <thead><tr><th>Name</th><th>Capacity</th></tr></thead>
+                <tbody>
+                  @for (c of item.closedCourts; track c.id) {
+                    <tr>
+                      <td>{{c.name}}</td>
+                      <td>{{c.capacity}}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="2" class="empty-row">No closed courts yet</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="courts-block">
+            <div class="courts-block-header">
+              <h5>Team sport halls</h5>
+              <span class="courts-count">{{item.halls.length}}</span>
+            </div>
+            @if(!item.hallNamesUnique){
+              <div class="error-msg">⚠️ Duplicate names found</div>
+            }
+            <div class="table-wrapper">
+              <table class="styled-table">
+                <thead><tr><th>Name</th><th>Capacity</th></tr></thead>
+                <tbody>
+                  @for (c of item.halls; track c.id) {
+                    <tr>
+                      <td>{{c.name}}</td>
+                      <td>{{c.capacity}}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="2" class="empty-row">No halls yet</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    } @empty {
+      <p class="no-facilities-msg">No facilities found.</p>
+    }
+
+  </section>
+
+</div>

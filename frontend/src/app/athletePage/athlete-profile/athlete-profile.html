@@ -1,0 +1,209 @@
+<app-athlete-nav-bar></app-athlete-nav-bar>
+<div class="profile-container">
+
+  <section class="section profile-header">
+    <div class="image-wrapper">
+      <img class="profile-image" [src]="imagePreview || profileImageUrl" alt="Profile image" />
+      <label class="image-edit-btn">
+        +
+        <input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+      </label>
+    </div>
+
+    <div class="profile-info">
+      <h2 class="username">&#64;{{athlete.username}}</h2>
+
+      <div class="sports-list">
+        @for (sport of favoriteSports; track sport.id) {
+          <span class="sport-badge">
+            {{sport.name}}
+            <button class="remove-sport-btn" (click)="removeSport(sport)">×</button>
+          </span>
+        }
+      </div>
+
+      <div class="add-sport-row">
+        <select [(ngModel)]="selectedSportToAdd">
+          <option [ngValue]="null">Select Favorite Sport</option>
+          @for (sport of availableSportsToAdd; track sport.id) {
+            <option [ngValue]="sport.id">{{sport.name}}</option>
+          }
+        </select>
+        <button class="secondary-btn" (click)="addSport()">+ Add Sport</button>
+      </div>
+
+      @if(message3){
+        <div class="success-msg">{{message3.message}}</div>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+  <h3 class="section-title">Edit Profile Information</h3>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <input type="text" [(ngModel)]="athlete.firstname" placeholder=" " />
+        <label>Firstname</label>
+      </div>
+
+      <div class="form-group">
+        <input type="text" [(ngModel)]="athlete.lastname" placeholder=" " />
+        <label>Lastname</label>
+      </div>
+
+      <div class="form-group">
+        <input type="email" [(ngModel)]="athlete.email" placeholder=" " />
+        <label>Email</label>
+      </div>
+
+      <div class="form-group">
+        <input type="text" [(ngModel)]="athlete.phone" placeholder=" " />
+        <label>Phone number</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="primary-btn" (click)="saveChanges()">Save changes</button>
+      @if(message1){
+        <div class="success-msg">{{message1.message}}</div>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+  <h3 class="section-title">Change Password</h3>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <input type="password" [(ngModel)]="oldPassword" placeholder=" " />
+        <label>Current password</label>
+      </div>
+
+      <div class="form-group"></div>
+
+      <div class="form-group">
+        <input type="password" [(ngModel)]="newPassword" placeholder=" " />
+        <label>New password</label>
+      </div>
+
+      <div class="form-group">
+        <input type="password" [(ngModel)]="confirmPassword" placeholder=" " />
+        <label>Confirm new password</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="primary-btn" (click)="changePassword()">Change password</button>
+      @if(message4.message != ""){
+        <div [class.success-msg]="message4.success" [class.error-msg]="!message4.success">
+          {{message4.message}}
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">My Reservations</h3>
+
+    <div class="table-wrapper">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('facilityName')">Facility {{ sortColumn === 'facilityName' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th (click)="sortBy('city')">City {{ sortColumn === 'city' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th (click)="sortBy('courtName')">Court {{ sortColumn === 'courtName' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th (click)="sortBy('sport')">Sport {{ sortColumn === 'sport' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th (click)="sortBy('timeFrom')">Date & Time {{ sortColumn === 'timeFrom' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th (click)="sortBy('status')">Status {{ sortColumn === 'status' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (r of sortedReservations; track r.id) {
+            <tr>
+              <td>{{r.facilityName}}</td>
+              <td>{{r.city}}</td>
+              <td>{{r.courtName}}</td>
+              <td>{{r.sport}}</td>
+              <td>
+                {{r.timeFrom | date:'dd.MM.yy HH:mm'}}
+                -
+                {{r.timeTo | date:'HH:mm'}}
+              </td>
+
+              <td>
+                <span
+                  class="status-badge"
+                  [class.scheduled]="r.status === 'BOOKED'"
+                  [class.confirmed]="r.status === 'CONFIRMED'"
+                  [class.cancelled]="r.status === 'CANCELLED'"
+                  [class.no-show]="r.status === 'NO_SHOW'">
+                  {{ getReservationStatusDisplay(r).icon }} {{ getReservationStatusDisplay(r).text }}
+                </span>
+              </td>
+
+              <td>
+                @if (canCancel(r.timeFrom) && r.status !== 'CANCELLED' && r.status !== 'NO_SHOW') {
+                  <button class="danger-btn" (click)="cancelReservation(r.id)">
+                    Cancel
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if(message2){
+      <div class="success-msg">{{message2.message}}</div>
+    }
+  </section>
+
+  <section class="section">
+    <h3 class="section-title">My Trainings</h3>
+
+    <div class="table-wrapper">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Trainer</th>
+            <th>Facility</th>
+            <th>Sport</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (t of trainings; track t.id) {
+            <tr>
+              <td>{{t.trainerName}}</td>
+              <td>{{t.facilityName}}</td>
+              <td>{{t.sportName}}</td>
+              <td>{{t.trainingDate | date:'dd.MM.yy'}} {{t.timeFrom | slice:0:5}} - {{t.timeTo | slice:0:5}}</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.scheduled]="t.status === 'BOOKED'"
+                  [class.confirmed]="t.status === 'CONFIRMED'"
+                  [class.no-show]="t.status === 'NO_SHOW'">
+                  @if (t.status === 'BOOKED') {
+                     📅 Scheduled 
+                  } @else if (t.status === 'NO_SHOW') {
+                    ❌ Missed
+                  } @else {
+                    ✅ Completed
+                  }
+                </span>
+            </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

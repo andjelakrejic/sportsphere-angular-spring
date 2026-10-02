@@ -1,0 +1,64 @@
+<app-header></app-header>
+<div class="home-container">
+
+  <div class="stats-banner">
+    <div class="stat-card">
+      <span class="stat-number">{{numActiveFacilities}}</span>
+      <span class="stat-label">Active Facilities</span>
+    </div>
+  </div>
+
+  <span class="error-msg" *ngIf="message">{{message}}</span>
+
+  <section class="section">
+    <h2 class="section-title">🏆 Top 3 Facilities</h2>
+    <div class="top3-grid">
+      @for(n of top3Facilities; track n.id){
+        <div class="facility-card">
+          <div class="facility-rank">#{{$index + 1}}</div>
+          <div class="facility-info">
+            <p class="facility-name">{{n.name}}</p>
+            <p class="facility-likes">❤️ {{n.numOfLikes}} likes</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">🎯 Active Promotions</h2>
+    <div class="table-wrapper">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Promotion</th>
+            <th>Facility</th>
+            <th>Date From</th>
+            <th>Date To</th>
+            <th>Discount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(n of activePromotions; track n.id){
+            <tr>
+              <td>{{n.name}}</td>
+              <td>{{n.facilityName}}</td>
+              <td>{{n.dateFrom | date:'dd.MM.yyyy'}}</td>
+              <td>{{n.dateTo | date:'dd.MM.yyyy'}}</td>
+              <td>
+                <span class="discount-badge" [class.percentage]="n.discountType === 'PERCENTAGE'">
+                  {{n.discountType === 'PERCENTAGE' ? n.discountValue + '%' : n.discountValue + ' RSD'}} off
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <app-search></app-search>
+  </section>
+
+</div>

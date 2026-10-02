@@ -1,0 +1,215 @@
+.details-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.details-header {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.details-header h2 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.city {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 12px;
+}
+
+.likes {
+  font-size: 14px;
+  color: #e74c3c;
+}
+
+.details-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.info-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 11px;
+  color: #888;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.gallery {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.gallery h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 1rem;
+}
+
+.gallery-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gallery-img {
+  flex: 1;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.gallery-btn {
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gallery-btn:hover {
+  background: #333;
+}
+
+.gallery-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dot.active {
+  background: #1a1a1a;
+}
+
+@media (max-width: 600px) {
+  .gallery-img {
+    height: 200px;
+  }
+}
+
+/* --- Courts Section --- */
+.courts-section {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* Prati stil .gallery h3 */
+.courts-section h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+}
+
+/* Rešetka koja se ponaša slično kao tvoj .details-info */
+.courts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+/* Prati strukturu i dizajn tvoje .info-card klase */
+.court-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+/* Blagi hover efekat koji se uklapa sa tvojim dugmićima */
+.court-card:hover {
+  border-color: #ddd;
+  background: #fafafa;
+}
+
+.court-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* Prati stilove tvojih .info-value vrednosti */
+.court-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Ako nema terena, stil prati .city klasu za suptilan izgled */
+.no-courts {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+  grid-column: 1 / -1;
+}
+
+.court-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.court-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #1a1a1a; /* Podrazumevano za CLOSE (crna/tamna slova) */
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+/* Ako je teren OPEN, dajemo mu suptilnu plavu/zelenu notu ili svetliji izgled */
+.court-type-badge.open-type {
+  color: #27ae60; 
+  background: #ebf5fb;
+}

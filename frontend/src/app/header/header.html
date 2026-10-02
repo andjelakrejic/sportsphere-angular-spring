@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <a routerLink="/">
+      <span class="brand-icon">⚽</span>
+      <span class="brand-name">SportSphere Hub</span>
+    </a>
+  </div>
+
+  <div class="navbar-menu" [class.open]="menuOpen">
+    <button class="btn-outline" (click)="openLogin()">Login</button>
+    <button class="btn-primary" (click)="openRegister()">Register</button>
+  </div>
+
+  <button class="hamburger" (click)="menuOpen = !menuOpen" aria-label="Meni">
+    <span></span><span></span><span></span>
+  </button>
+</nav>

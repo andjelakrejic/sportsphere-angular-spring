@@ -1,0 +1,346 @@
+.shop-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Nav */
+
+.shop-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.shop-nav button {
+  padding: 8px 20px;
+  background: white;
+  color: #1a1a1a;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.shop-nav button:hover {
+  background: #f5f5f5;
+}
+
+.shop-nav button.active {
+  background: #1a1a1a;
+  color: white;
+  border-color: #1a1a1a;
+}
+
+/* Sport filter */
+
+.sport-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.sport-filter button {
+  padding: 4px 12px;
+  background: white;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sport-filter button:hover {
+  background: #f5f5f5;
+}
+
+.sport-filter button.active {
+  background: #1a1a1a;
+  color: white;
+  border-color: #1a1a1a;
+}
+
+/* Equipment grid */
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.equipment-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.equipment-card:hover {
+  border-color: #ddd;
+  background: #fafafa;
+}
+
+.equipment-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.equipment-card h3 {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.equipment-card .price {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.equipment-card .stock {
+  margin: 0;
+  font-size: 11px;
+  color: #27ae60;
+}
+
+.equipment-card .stock.out {
+  color: #c0392b;
+}
+
+.equipment-card button {
+  margin-top: auto;
+  padding: 6px 14px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.equipment-card button:hover {
+  background: #333;
+}
+
+.equipment-card button:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Cart */
+
+.cart-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.cart-card h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+  color: #333;
+}
+
+.cart-item span:first-child {
+  flex: 1;
+  font-weight: 500;
+}
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-control button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+.qty-control button:hover {
+  background: #f5f5f5;
+}
+
+.qty-control span {
+  min-width: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.remove-btn {
+  padding: 4px 10px;
+  background: white;
+  color: #c0392b;
+  border: 1px solid #f5c2c2;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.remove-btn:hover {
+  background: #fff0f0;
+}
+
+.cart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cart-total {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.order-btn {
+  padding: 8px 20px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.order-btn:hover {
+  background: #333;
+}
+
+/* Orders */
+
+.orders-section h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+}
+
+.order-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.order-card:hover {
+  border-color: #ddd;
+}
+
+.order-card p {
+  margin: 0;
+}
+
+.order-card .order-date {
+  color: #888;
+  font-size: 12px;
+}
+
+.order-card .order-price {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.order-card .cancel-btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  background: white;
+  color: #c0392b;
+  border: 1px solid #f5c2c2;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.order-card .cancel-btn:hover {
+  background: #fff0f0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f0fff4;
+  color: #27ae60;
+}
+
+.status-badge.canceled {
+  background: #fff0f0;
+  color: #c0392b;
+}
+
+.status-badge.picked {
+  background: #f9f9f9;
+  color: #666;
+}
+
+.empty-msg {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .equipment-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .cart-item {
+    flex-wrap: wrap;
+  }
+
+  .order-card {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,110 @@
+.sports-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sports-container h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.add-sport-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.add-sport-card h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.add-sport-row {
+  display: flex;
+  gap: 8px;
+}
+
+.add-sport-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.add-sport-row input:focus {
+  outline: none;
+  border-color: #378ADD;
+}
+
+.primary-btn {
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.primary-btn:hover {
+  background: #333;
+}
+
+.table-wrapper {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table th {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.styled-table td {
+  font-size: 13px;
+  color: #1a1a1a;
+  padding: 8px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.empty-msg {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.success-msg {
+  font-size: 13px;
+  color: #27ae60;
+  margin-top: 4px;
+}
+
+.error-msg {
+  font-size: 13px;
+  color: #e74c3c;
+  margin-top: 4px;
+}

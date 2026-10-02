@@ -1,0 +1,134 @@
+<app-athlete-nav-bar></app-athlete-nav-bar>
+
+<div class="details-container">
+
+  <span class="error-msg" *ngIf="errorMsg">{{errorMsg}}</span>
+
+  @if(!loading && !errorMsg){
+
+    <div class="details-header">
+      <h2>{{facility.name}}</h2>
+      <p class="city">📍 {{facility.city}}, {{facility.address}}</p>
+      <div class="likes">
+        @if (ratingSummary.likes == 1) {
+          ❤️ {{ratingSummary.likes}} like
+        } @else {
+          ❤️ {{ratingSummary.likes}} likes
+        }
+        @if (ratingSummary.dislikes == 1) {
+          💔 {{ratingSummary.dislikes}} dislike
+        } @else {
+          💔 {{ratingSummary.dislikes}} dislikes
+        }
+      </div>
+      <p class="description">{{facility.description}}</p>
+    </div>
+
+    <div class="details-info">
+      <div class="info-card">
+        <span class="info-label">Working hours</span>
+        <span class="info-value">{{facility.workingHoursFrom.slice(0,5)}} - {{facility.workingHoursTo.slice(0,5)}}</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label">Price per hour</span>
+        <span class="info-value">{{facility.pricePerHour}} RSD</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label">Available courts</span>
+        <span class="info-value">{{courts.length}}</span>
+      </div>
+    </div>
+
+    @if(images.length > 0){
+      <div class="gallery">
+        <h3>Gallery</h3>
+        <div class="gallery-main">
+          <button class="gallery-btn" (click)="prevImage()">‹</button>
+          <img [src]="images[currentImage]" alt="Facility image" class="gallery-img" />
+          <button class="gallery-btn" (click)="nextImage()">›</button>
+        </div>
+        <div class="gallery-dots">
+          @for(img of images; track $index){
+            <span class="dot" [class.active]="$index === currentImage" (click)="currentImage = $index"></span>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="map-section">
+      <h3>Location</h3>
+      <div class="map-placeholder">
+        <span>📍 {{facility.address}}, {{facility.city}}</span>
+      </div>
+    </div>
+
+  @if(courts.length > 0){
+    <div class="calendar-section">
+      <div class="calendar-section-header">
+        <h3>Reserve a court</h3>
+        @if(!blockStatus?.blocked){
+        <app-athlete-reservation-form
+          [courts]="courts"
+          [facility]="facility"
+          [athleteId]="athleteId">
+        </app-athlete-reservation-form>
+      }
+      </div>
+      @if(blockStatus?.blocked){
+        <div class="error-msg block-warning">
+          ⚠️ You are blocked from making reservations at this facility due to repeated no-shows
+          ({{blockStatus?.noShowCount}}/{{blockStatus?.maxNoShows}}).
+        </div>
+      } @else {
+        <app-athlete-calendar 
+          [courts]="courts" 
+          [facility]="facility" 
+          [athleteId]="athleteId">
+        </app-athlete-calendar>
+      }
+      </div>
+  } @else {
+      <p class="no-courts">No courts available for this facility yet.</p>
+    }
+
+  <div class="rating-section">
+      <h3>Ratings & Reviews</h3>
+
+      <div class="reaction-buttons">
+        <button class="reaction-btn" [class.active]="myReaction === 'LIKE'" (click)="react('LIKE')">
+          👍 {{ ratingSummary.likes }}
+        </button>
+        <button class="reaction-btn" [class.active]="myReaction === 'DISLIKE'" (click)="react('DISLIKE')">
+          👎 {{ ratingSummary.dislikes }}
+        </button>
+      </div>
+
+      @if(ratingErrorMsg){
+        <span class="error-msg">{{ ratingErrorMsg }}</span>
+      }
+
+      <div class="comment-form">
+        <textarea [(ngModel)]="newComment" placeholder="Leave a comment..." rows="2"></textarea>
+        <button class="submit-btn" (click)="submitComment()">Send</button>
+      </div>
+
+      <div class="comments-list">
+        @if(comments.length === 0){
+          <p class="no-comments">No comments yet.</p>
+        }
+        @for (c of comments; track c.id) {
+          <div class="comment-card" [class.own-comment]="c.ownComment">
+            @if (c.ownComment) {
+              <span class="own-badge">Your comment</span>
+            }
+            <div class="comment-author">{{ c.athleteName }}</div>
+            <div class="comment-text">{{ c.comment }}</div>
+            <div class="comment-date">{{ c.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+  }
+
+</div>

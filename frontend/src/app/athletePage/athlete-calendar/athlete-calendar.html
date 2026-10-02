@@ -1,0 +1,60 @@
+<div class="calendar-card">
+
+  <div class="calendar-header">
+    <div class="court-nav">
+      <button (click)="prevCourt()" [disabled]="courts.length <= 1">‹</button>
+      <span class="court-label">{{currentCourt.name}} ({{currentCourt.type}})</span>
+      <button (click)="nextCourt()" [disabled]="courts.length <= 1">›</button>
+    </div>
+    <div class="week-nav">
+      <button (click)="prevWeek()">‹ Prev week</button>
+      <span class="week-label">{{weekDays[0] | date:'dd.MM'}} - {{weekDays[6] | date:'dd.MM.yyyy'}}</span>
+      <button (click)="nextWeek()">Next week ›</button>
+    </div>
+  </div>
+
+  <table class="calendar-table">
+    <thead>
+      <tr>
+        <th></th>
+        @for(day of weekDays; track day){
+          <th>{{day | date:'EEE'}}<br>{{day | date:'dd'}}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for(time of timeSlots; track time){
+        <tr>
+          <td class="time-label">{{time}}</td>
+          @for(day of weekDays; track day){
+            <td class="slot-cell">
+              <div 
+                class="slot"
+                [class.taken]="isSlotTaken(day, time)"
+                [class.selected]="isSlotSelected(day, time)"
+                [class.past]="isPastSlot(day, time)"
+                (click)="selectSlot(day, time)">
+              </div>
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot free"></div>Free</div>
+    <div class="legend-item"><div class="dot taken"></div>Taken</div>
+    <div class="legend-item"><div class="dot selected"></div>Selected</div>
+  </div>
+
+  @if(selectedDay && selectedTime){
+    <div class="confirm-bar">
+      <span>Selected: {{selectedDay | date:'EEE dd.MM'}}, {{selectedTime}} - {{(+selectedTime.split(':')[0] + 1).toString().padStart(2,'0')}}:00</span>
+      <button (click)="confirmReservation()">Confirm reservation</button>
+    </div>
+  }
+
+  <span class="message" *ngIf="message">{{message}}</span>
+
+</div>

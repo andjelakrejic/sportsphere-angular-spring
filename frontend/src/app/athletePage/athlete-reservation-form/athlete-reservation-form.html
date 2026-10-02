@@ -1,0 +1,70 @@
+<div class="reserve-form-toggle">
+  <button class="open-form-btn" (click)="openForm()">
+    Reservation Form
+  </button>
+</div>
+
+@if(isOpen){
+  <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3>Reserve via form</h3>
+        <button class="close-btn" (click)="closeForm()">✕</button>
+      </div>
+
+      <div class="form-row">
+        <label for="court-select">Court</label>
+        <select id="court-select" [(ngModel)]="selectedCourtId" (ngModelChange)="onCourtOrDateChange()">
+          @for(court of courts; track court.id){
+            <option [ngValue]="court.id">{{court.name}} ({{court.type}})</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="date-select">Date</label>
+        <input id="date-select" type="date" [min]="minDate" [(ngModel)]="selectedDate" (ngModelChange)="onCourtOrDateChange()" />
+      </div>
+
+      <div class="form-row">
+        <label for="start-select">Start time</label>
+        <select id="start-select" [(ngModel)]="selectedStartTime" (ngModelChange)="onStartTimeChange()">
+          <option [ngValue]="null" disabled>Select start time</option>
+          @for(time of availableStartTimes; track time){
+            <option [ngValue]="time">{{time}}</option>
+          }
+        </select>
+        @if(availableStartTimes.length === 0){
+          <span class="hint-msg">No available slots for this court on this date.</span>
+        }
+      </div>
+
+      @if(selectedStartTime){
+        <div class="form-row">
+          <label for="duration-select">Duration (hours)</label>
+          <select id="duration-select" [(ngModel)]="selectedDuration">
+            @for(d of durationOptions; track d){
+              <option [ngValue]="d">{{d}}h</option>
+            }
+          </select>
+          <span class="hint-msg">You can book multiple consecutive hours in one reservation.</span>
+        </div>
+      }
+
+      @if(selectedStartTime && selectedDuration){
+        <div class="preview-bar">
+          <span>{{selectedDate | date:'dd.MM.yyyy'}}, {{selectedStartTime}} - {{endTimePreview}}</span>
+        </div>
+      }
+
+      <button class="primary-btn" (click)="submitReservation()" [disabled]="!selectedStartTime || !selectedDuration">
+        Confirm reservation
+      </button>
+
+      <span class="success-msg" *ngIf="message">{{message}}</span>
+      <span class="error-msg" *ngIf="errorMsg">{{errorMsg}}</span>
+
+    </div>
+  </div>
+}

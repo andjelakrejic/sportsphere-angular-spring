@@ -1,0 +1,23 @@
+<app-athlete-nav-bar></app-athlete-nav-bar>
+
+<div class="reviews-container">
+  <h2>My Comments</h2>
+
+  <span class="error-msg" *ngIf="errorMsg">{{errorMsg}}</span>
+
+  @if(!loading && !errorMsg){
+    @if(comments.length === 0){
+      <p class="no-comments">You haven't left any comments yet.</p>
+    } @else {
+      <div class="comments-list">
+        @for (c of comments; track c.id) {
+          <div class="comment-card">
+            <div class="comment-facility">{{ c.facilityName }}</div>
+            <div class="comment-text">{{ c.comment }}</div>
+            <div class="comment-date">{{ c.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

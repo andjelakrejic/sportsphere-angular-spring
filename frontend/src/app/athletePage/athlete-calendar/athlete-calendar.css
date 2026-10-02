@@ -1,0 +1,146 @@
+.calendar-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.court-nav, .week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.court-nav button, .week-nav button {
+  padding: 4px 10px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.court-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.week-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.calendar-table th {
+  padding: 6px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.time-label {
+  padding: 4px 6px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.slot-cell {
+  padding: 2px;
+}
+
+.slot {
+  background: #DFF5E1;
+  border-radius: 4px;
+  height: 24px;
+  cursor: pointer;
+  transition: opacity 0.1s ease;
+}
+
+.slot:hover {
+  opacity: 0.7;
+}
+
+.slot.taken {
+  background: #FBDADA;
+  cursor: not-allowed;
+}
+
+.slot.past {
+  background: #eee;
+  cursor: not-allowed;
+}
+
+.slot.selected {
+  background: #C8E3FA;
+  border: 2px solid #378ADD;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #888;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.dot.free { background: #DFF5E1; }
+.dot.taken { background: #FBDADA; }
+.dot.selected { background: #C8E3FA; border: 1.5px solid #378ADD; }
+
+.confirm-bar {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.confirm-bar span {
+  font-size: 12px;
+  color: #666;
+}
+
+.confirm-bar button {
+  padding: 8px 20px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.message {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #1e7e34;
+}

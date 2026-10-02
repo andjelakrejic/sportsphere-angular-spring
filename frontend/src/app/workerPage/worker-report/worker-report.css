@@ -1,0 +1,98 @@
+.report-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.report-card h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.report-section {
+  border-top: 1px solid #eee;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.report-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.report-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.report-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 11px;
+  color: #888;
+}
+
+.field select,
+.field input {
+  padding: 7px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a1a1a;
+  background: white;
+  min-width: 150px;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: #378ADD;
+}
+
+.primary-btn {
+  background: #378ADD;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.primary-btn:hover {
+  background: #2f7bc4;
+}
+
+.primary-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.message {
+  font-size: 13px;
+  color: #e74c3c;
+  text-align: center;
+}

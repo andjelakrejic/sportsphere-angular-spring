@@ -1,0 +1,61 @@
+.reviews-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reviews-container h2 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.comment-facility {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.comment-text {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.comment-date {
+  font-size: 11px;
+  color: #999;
+}
+
+.no-comments {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  padding: 2rem;
+}
+
+.error-msg {
+  background: #fff0f0;
+  border: 1px solid #f5c2c2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #c0392b;
+}

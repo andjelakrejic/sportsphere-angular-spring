@@ -1,0 +1,35 @@
+<div class="overlay" (click)="onClose()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>Book Training with {{ trainer.firstName }} {{ trainer.lastName }}</h3>
+    <p class="price">{{ trainer.pricePerHour }} RSD / hour</p>
+
+    @if (!successMessage) {
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" [(ngModel)]="date" />
+      </div>
+
+      <div class="form-group">
+        <label>Time</label>
+        <select [(ngModel)]="time">
+          <option value="" disabled selected>Select time</option>
+          @for(slot of timeSlots; track slot){
+            <option [value]="slot">{{slot}}</option>
+          }
+        </select>
+      </div>
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      <div class="actions">
+        <button class="cancel-btn" (click)="onClose()">Cancel</button>
+        <button class="confirm-btn" (click)="submit()">Confirm Booking</button>
+      </div>
+    } @else {
+      <p class="success">{{ successMessage }}</p>
+      <button class="confirm-btn" (click)="onClose()">Close</button>
+    }
+  </div>
+</div>

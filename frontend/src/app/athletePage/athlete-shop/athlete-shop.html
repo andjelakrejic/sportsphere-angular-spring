@@ -1,0 +1,109 @@
+<app-athlete-nav-bar />
+<div class="shop-container">
+
+  <!-- Nav -->
+  <div class="shop-nav">
+    <button [class.active]="view === 'shop'" (click)="view = 'shop'">
+      Shop
+    </button>
+    <button [class.active]="view === 'cart'" (click)="view = 'cart'">
+      Cart @if(getCartCount() > 0) { ({{ getCartCount() }}) }
+    </button>
+    <button [class.active]="view === 'orders'" (click)="view = 'orders'">
+      My Orders
+    </button>
+  </div>
+
+  <!-- SHOP VIEW -->
+  @if(view === 'shop') {
+    <div class="sport-filter">
+      <button [class.active]="selectedSportId === 0" (click)="filterBySport(0)">All</button>
+      @for(sport of sports; track sport.id) {
+        <button [class.active]="selectedSportId === sport.id" (click)="filterBySport(sport.id)">
+          {{ sport.name }}
+        </button>
+      }
+    </div>
+
+    <div class="equipment-grid">
+      @for(e of filteredEquipment; track e.id) {
+        <div class="equipment-card">
+          <img [src]="getImageUrl(e.imageUrl)" [alt]="e.name" />
+          <h3>{{ e.name }}</h3>
+          <p class="price">{{ e.price | currency:'RSD':'symbol':'1.0-0' }}</p>
+          <p class="stock" [class.out]="e.stockQuantity === 0">
+            @if(e.stockQuantity > 0) { In stock: {{ e.stockQuantity }} }
+            @else { Out of stock }
+          </p>
+          <button (click)="addToCart(e)" [disabled]="e.stockQuantity === 0">
+            Add to cart
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- CART VIEW -->
+  @if(view === 'cart') {
+    <div class="cart-card">
+      <h3>Cart</h3>
+      @if(cart.length === 0) {
+        <p class="empty-msg">Your cart is empty.</p>
+      } @else {
+        @for(c of cart; track c.equipment.id) {
+          <div class="cart-item">
+            <span>{{ c.equipment.name }}</span>
+            <div class="qty-control">
+              <button (click)="changeQuantity(c.equipment.id, -1)">-</button>
+              <span>{{ c.quantity }}</span>
+              <button (click)="changeQuantity(c.equipment.id, 1)">+</button>
+            </div>
+            <span>{{ c.equipment.price * c.quantity | currency:'RSD':'symbol':'1.0-0' }}</span>
+            <button class="remove-btn" (click)="removeFromCart(c.equipment.id)">Remove</button>
+          </div>
+        }
+        <div class="cart-footer">
+          <span class="cart-total">Total: {{ getTotalPrice() | currency:'RSD':'symbol':'1.0-0' }}</span>
+          <button class="order-btn" (click)="placeOrder()">Place Order</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ORDERS VIEW -->
+  @if(view === 'orders') {
+    <div class="orders-section">
+      <h3>Active Orders</h3>
+      @if(activeOrders.length === 0) {
+        <p class="empty-msg">No active orders.</p>
+      } @else {
+        @for(o of activeOrders; track o.id) {
+          <div class="order-card">
+            <p class="order-date">{{ o.createdAt | date:'dd.MM.yyyy HH:mm' }}</p>
+            <p class="order-price">{{ o.totalPrice | currency:'RSD':'symbol':'1.0-0' }}</p>
+            <span class="status-badge">ORDERED</span>
+            <button class="cancel-btn" (click)="cancelOrder(o.id)">Cancel</button>
+          </div>
+        }
+      }
+
+      <h3 style="margin-top: 1.5rem;">Purchase History</h3>
+      @if(historyOrders.length === 0) {
+        <p class="empty-msg">No purchase history.</p>
+      } @else {
+        @for(o of historyOrders; track o.id) {
+          <div class="order-card">
+            <p class="order-date">{{ o.createdAt | date:'dd.MM.yyyy HH:mm' }}</p>
+            <p class="order-price">{{ o.totalPrice | currency:'RSD':'symbol':'1.0-0' }}</p>
+            <span class="status-badge"
+              [class.canceled]="o.status === 'CANCELED'"
+              [class.picked]="o.status === 'PICKED UP'">
+              {{ o.status }}
+            </span>
+          </div>
+        }
+      }
+    </div>
+  }
+
+</div>

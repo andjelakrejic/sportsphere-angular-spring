@@ -1,0 +1,83 @@
+=========================================
+KORIŠĆENE BIBLIOTEKE / LIBRARIES USED
+=========================================
+
+BACKEND (Spring Boot 3.5.8, Java 21)
+-----------------------------------------
+1. Spring Boot Starter Web
+   https://spring.io/projects/spring-boot
+   (upravlja se preko Spring Boot parent POM-a, verzija 3.5.8)
+
+2. Spring Boot Starter Test
+   https://spring.io/projects/spring-boot
+   (upravlja se preko Spring Boot parent POM-a, verzija 3.5.8)
+
+3. Spring Boot Starter JDBC
+   https://spring.io/projects/spring-boot
+   (upravlja se preko Spring Boot parent POM-a, verzija 3.5.8)
+
+4. MySQL Connector/J — verzija 9.5.0
+   https://dev.mysql.com/downloads/connector/j/
+   (JDBC drajver za konekciju na MySQL bazu)
+
+5. jBCrypt — verzija 0.4
+   https://www.mindrot.org/projects/jBCrypt/
+   (hashovanje lozinki korisnika)
+
+6. OpenPDF — verzija 1.3.30
+   https://github.com/LibrePDF/OpenPDF
+   (generisanje PDF dokumenata)
+
+Sve zavisnosti se automatski preuzimaju putem Maven-a
+pokretanjem: mvn clean install
+
+
+FRONTEND (Angular 20)
+-----------------------------------------
+1. @angular/cdk — verzija ^20.2.14
+   https://material.angular.io/cdk/categories
+   (drag-and-drop funkcionalnost za Worker Calendar)
+
+2. @angular/common — verzija ^20.3.0
+   https://angular.dev
+
+3. @angular/compiler — verzija ^20.3.0
+   https://angular.dev
+
+4. @angular/core — verzija ^20.3.0
+   https://angular.dev
+
+5. @angular/forms — verzija ^20.3.0
+   https://angular.dev
+
+6. @angular/google-maps — verzija ^20.2.14
+   https://angular.dev/api/google-maps
+
+7. @angular/platform-browser — verzija ^20.3.0
+   https://angular.dev
+
+8. @angular/router — verzija ^20.3.0
+   https://angular.dev
+
+9. Chart.js — verzija ^4.5.1
+   https://www.chartjs.org/
+   (dijagrami za statistiku sportiste)
+
+10. RxJS — verzija ~7.8.0
+    https://rxjs.dev/
+
+11. tslib — verzija ^2.3.0
+    https://www.npmjs.com/package/tslib
+
+12. zone.js — verzija ~0.15.0
+    https://www.npmjs.com/package/zone.js
+
+Dev zavisnosti (Angular CLI, build alati, testiranje):
+- @angular/build, @angular/cli, @angular/compiler-cli
+- @types/jasmine, jasmine-core
+- karma, karma-chrome-launcher, karma-coverage,
+  karma-jasmine, karma-jasmine-html-reporter
+- typescript ~5.9.2
+
+Sve zavisnosti se automatski preuzimaju putem npm-a
+pokretanjem: npm install

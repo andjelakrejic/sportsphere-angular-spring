@@ -1,0 +1,45 @@
+<app-admin-nav-bar></app-admin-nav-bar>
+
+<div class="requests-container">
+  <h2>Facility Requests</h2>
+
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>City</th>
+          <th>Address</th>
+          <th>Price / hour</th>
+          <th>Working hours</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of facilities; track f.id) {
+          <tr>
+            <td>{{f.name}}</td>
+            <td>{{f.city}}</td>
+            <td>{{f.address}}</td>
+            <td>{{f.pricePerHour}} RSD</td>
+            <td>{{f.workingHoursFrom | slice:0:5}} - {{f.workingHoursTo | slice:0:5}}</td>
+            <td class="actions-cell">
+              <button class="primary-btn" (click)="approve(f.id)">Approve</button>
+              <button class="danger-btn" (click)="deny(f.id)">Deny</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (facilities.length === 0) {
+      <p class="empty-msg">No pending facility requests.</p>
+    }
+  </div>
+
+  @if (message) {
+    <div [class.success-msg]="message.success" [class.error-msg]="!message.success">
+      {{message.message}}
+    </div>
+  }
+</div>

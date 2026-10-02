@@ -1,0 +1,68 @@
+<app-header></app-header>
+<div class="details-container">
+
+  <div class="details-header">
+    <h2>{{facility.name}}</h2>
+    <p class="city">📍 {{facility.city}}, {{facility.address}}</p>
+    <div class="likes">
+        @if (ratingSummary.likes == 1) {
+          ❤️ {{ratingSummary.likes}} like
+        } @else {
+          ❤️ {{ratingSummary.likes}} likes
+        }
+        @if (ratingSummary.dislikes == 1) {
+          💔 {{ratingSummary.dislikes}} dislike
+        } @else {
+          💔 {{ratingSummary.dislikes}} dislikes
+        }
+      </div>
+  </div>
+
+  <div class="details-info">
+    <div class="info-card">
+      <span class="info-label">Working hours</span>
+      <span class="info-value">{{facility.workingHoursFrom.slice(0,5)}} - {{facility.workingHoursTo.slice(0,5)}}</span>
+    </div>
+    <div class="info-card">
+      <span class="info-label">Price per hour</span>
+      <span class="info-value">{{facility.pricePerHour}} RSD</span>
+    </div>
+  </div>
+
+<div class="courts-section">
+  <h3>Available courts / halls</h3>
+  <div class="courts-grid">
+    @for (c of courts; track c.name) {
+      <div class="court-card">
+        <span class="court-icon">{{ c.type === 'OPEN' ? '☀️' : '🏢' }}</span>
+        
+        <div class="court-details">
+          <span class="court-name">{{ c.name }}</span>
+          <span class="court-type-badge" [class.open-type]="c.type === 'OPEN'">
+            {{ c.type }}
+          </span>
+        </div>
+      </div>
+    } @empty {
+      <p class="no-courts">No available courts at the moment.</p>
+    }
+  </div>
+</div>
+
+  @if(images.length > 0){
+    <div class="gallery">
+      <h3>Gallery</h3>
+      <div class="gallery-main">
+        <button class="gallery-btn" (click)="prevImage()">‹</button>
+        <img [src]="images[currentImage]" alt="Facility image" class="gallery-img" />
+        <button class="gallery-btn" (click)="nextImage()">›</button>
+      </div>
+      <div class="gallery-dots">
+        @for(img of images; track $index){
+          <span class="dot" [class.active]="$index === currentImage" (click)="currentImage = $index"></span>
+        }
+      </div>
+    </div>
+  }
+
+</div>
