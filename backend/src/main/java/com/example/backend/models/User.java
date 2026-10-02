@@ -1,6 +1,6 @@
 package com.example.backend.models;
 
-public class User { //FALI created_at polje!
+public class User { 
     private int id;
     private String username;
     private String password;

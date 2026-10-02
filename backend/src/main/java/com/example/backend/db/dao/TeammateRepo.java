@@ -142,7 +142,7 @@ public class TeammateRepo implements TeammateRepoInterface {
             stm.setString(4, obj.getDate());
             stm.setString(5, obj.getTimeSlot());
             stm.setInt(6, obj.getTotalPlayersNeeded());
-            stm.setInt(7, obj.getTotalPlayersNeeded()); // missing_players = total na pocetku
+            stm.setInt(7, obj.getTotalPlayersNeeded()-1); // missing_players = total na pocetku
             
             if(stm.executeUpdate() > 0) {
                 m.setMessage("Successfully created ad!");

@@ -12,7 +12,7 @@ import com.example.backend.models.Court;
 public class CourtRepo implements CourtRepoInterface{
 
     @Override
-    public List<Court> getAvailableCourts(int id) { // da se doda provera za sport tj join sa facility_sport??
+    public List<Court> getAvailableCourts(int id) { 
         try (Connection conn = DB.source().getConnection();
          PreparedStatement stm = conn.prepareStatement("SELECT * FROM court WHERE facility_id=?")) {
          

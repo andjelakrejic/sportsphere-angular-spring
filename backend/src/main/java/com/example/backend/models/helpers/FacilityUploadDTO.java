@@ -9,10 +9,28 @@ public class FacilityUploadDTO {
     private String city;
     private String address;
     private String description;
+    public int registrationNumber;
+    public int taxId;
     private String workingHoursFrom;
     private String workingHoursTo;
     private double pricePerHour;
     private int maxNoShows;
+    public int getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(int registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    public int getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(int taxId) {
+        this.taxId = taxId;
+    }
+
     private List<CourtDTO> courts; // moze biti prazna lista
 
     public String getName() {

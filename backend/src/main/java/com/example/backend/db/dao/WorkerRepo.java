@@ -371,9 +371,10 @@ public class WorkerRepo implements WorkerRepoInterface {
     public int countWorkersAtFacility(String facilityName, String address) {
         try (Connection conn = DB.source().getConnection();
             PreparedStatement stm = conn.prepareStatement(
-                "SELECT COUNT(*) FROM worker w JOIN user u ON w.user_id = u.id " +
-                "WHERE LOWER(TRIM(w.facility_name)) = LOWER(TRIM(?)) " +
-                "AND LOWER(TRIM(w.address)) = LOWER(TRIM(?)) " +
+                "SELECT COUNT(*) FROM worker w JOIN user u ON w.user_id = u.id JOIN worker_facility wf ON wf.worker_id = w.user_id " +
+                "JOIN facility f ON f.id = wf.facility_id " +
+                "WHERE LOWER(TRIM(f.name)) = LOWER(TRIM(?)) " +
+                "AND LOWER(TRIM(f.address)) = LOWER(TRIM(?)) " +
                 "AND u.status != 'REJECTED'")
         ) {
             stm.setString(1, facilityName);
