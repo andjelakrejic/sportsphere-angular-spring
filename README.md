@@ -1,24 +1,24 @@
 # SportSphere
 
-Web aplikacija za rezervaciju sportskih terena, individualnih treninga i kupovinu sportske opreme.
-Projekat iz predmeta Programiranje internet aplikacija (ETF Beograd).
+A web application for booking sports courts, scheduling individual training sessions, and buying sports equipment.
+Built as a project for the Internet Application Programming course at the School of Electrical Engineering, University of Belgrade.
 
-## Tehnologije
+## Tech Stack
 - **Frontend:** Angular
 - **Backend:** Spring Boot (Java)
-- **Baza:** MySQL
+- **Database:** MySQL
 
-## Pokretanje
-1. Importuj `database/database.sql` u MySQL (pravi bazu `pia_project`)
-2. Backend: `cd backend` pa `./mvnw spring-boot:run`
+## Getting Started
+1. Import `database/database.sql` into MySQL (creates the `pia_project` database)
+2. Backend: `cd backend`, then `./mvnw spring-boot:run`
 3. Frontend: `cd frontend`, `npm install`, `ng serve`
-4. Otvori http://localhost:4200
+4. Open http://localhost:4200
 
-## Test nalozi
-Lozinka za sve: `Test1234!`
+## Test Accounts
+Password for all accounts: `Test1234!`
 
-| Uloga     | Korisničko ime |
-|-----------|----------------|
-| Admin     | admin          |
-| Sportista | ana_ns         |
-| Radnik    | milan_w        |
+| Role    | Username |
+|---------|----------|
+| Admin   | admin    |
+| Athlete | ana_ns   |
+| Worker  | milan_w  |
